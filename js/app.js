@@ -12,6 +12,12 @@
   if (G && window.SplitText) G.registerPlugin(window.SplitText);
   if (G && window.Flip) G.registerPlugin(window.Flip);
   if (ANIM) document.documentElement.classList.add("js-anim");
+  if (ST) ST.config({ ignoreMobileResize: true });
+  // light mode for modest devices (few cores, little memory or data saver); ?lite=1 / ?full=1 force it
+  var qs = location.search;
+  var LITE = /[?&]lite=1/.test(qs) || (!/[?&]full=1/.test(qs) && (((navigator.hardwareConcurrency || 8) <= 4) || ((navigator.deviceMemory || 8) <= 4) || !!(navigator.connection && navigator.connection.saveData)));
+  var COARSE = window.matchMedia("(pointer: coarse)").matches;
+  if (LITE) document.documentElement.classList.add("lite");
 
   /* ================= helpers ================= */
   function esc(s) {
@@ -82,6 +88,7 @@
     return "--bg:" + (t.bg || "#1a1f3f") + ";--bg2:" + (t.bg2 || "#2a2457") + ";--ink2:" + (t.ink || "#fff6e6") + ";--accent:" + (t.accent || "#ffcf6e") + ";--accent2:" + (t.accent2 || "#a586ff") + ";--c:" + (t.accent || "#ffcf6e");
   }
   function cardColor(h) { var t = h.tema || {}; return t.oscuro === false ? t.accent : (t.bg2 || t.accent); }
+  function thumb(h) { return h.miniatura || h.portada; }
   function cardCrop(h) {
     var f = h.tarjetaFoco || h.portadaFoco || "50% 50%", z = h.tarjetaZoom || 1;
     return "object-position:" + esc(f) + (z !== 1 ? ";transform:scale(" + z + ");transform-origin:" + esc(f) : "");
@@ -124,12 +131,13 @@
     var w = title.split(" ");
     if (w.length > 2) title = w.slice(0, -2).join(" ") + ' <span class="word-accent">' + w.slice(-2).join(" ") + "</span>";
     var stars = "";
-    for (var i = 0; i < 70; i++) {
+    var NS = LITE ? 24 : COARSE ? 40 : 70;
+    for (var i = 0; i < NS; i++) {
       stars += '<i class="star-dot" style="left:' + (Math.random() * 100).toFixed(1) + "%;top:" + (Math.random() * 85).toFixed(1) + "%;--s:" + (1 + Math.random() * 2.2).toFixed(1) + "px;--t:" + (2 + Math.random() * 4).toFixed(1) + "s;--d:-" + (Math.random() * 5).toFixed(1) + 's"></i>';
     }
     var skills = ["reading", "writing", "listening", "speaking"].map(function (k) { return '<span class="s-' + k + '">' + SKILLS[k] + "</span>"; }).join("");
     var fan = D.historias.slice(0, 4).map(function (s, i) {
-      return '<a class="fan-card" href="#story-' + s.id + '" data-i="' + i + '"><img src="' + esc(s.portada) + '" alt="" style="' + cardCrop(s) + '">' +
+      return '<a class="fan-card" href="#story-' + s.id + '" data-i="' + i + '"><img src="' + esc(s.portada) + '" alt="" decoding="async" fetchpriority="high" style="' + cardCrop(s) + '">' +
         '<span class="fc-txt"><small>' + esc(s.formato) + "</small><strong>" + esc(s.titulo) + '</strong></span><span class="shine"></span></a>';
     }).join("");
     return '<section id="home" class="hero"><div class="hero-sky" aria-hidden="true">' + stars + '</div><div class="hero-glow" id="hero-glow"></div>' +
@@ -195,7 +203,7 @@
 
   function picker() {
     var cards = D.historias.map(function (h, i) {
-      return '<a class="pick" href="#story-' + h.id + '" style="' + theme(h) + '"><span class="pick-im"><img src="' + esc(h.portada) + '" alt="" loading="lazy" style="' + cardCrop(h) + '"></span>' +
+      return '<a class="pick" href="#story-' + h.id + '" style="' + theme(h) + '"><span class="pick-im"><img src="' + esc(h.portada) + '" alt="" loading="lazy" decoding="async" style="' + cardCrop(h) + '"></span>' +
         '<span class="pick-num">' + pad(i + 1) + '</span><span class="pick-in"><span class="fmt">' + esc(h.formato || "Story") + "</span>" +
         "<h3>" + esc(h.titulo) + "</h3>" + (h.resumen ? "<p>" + esc(h.resumen) + "</p>" : "") +
         '<span class="go">Open chapter <i>→</i></span></span></a>';
@@ -216,9 +224,9 @@
 
   function flash(v, h, small) {
     return '<button type="button" class="flash' + (small ? " small" : "") + '" data-fg="vocab" data-fv="' + h.id + '" style="--c:' + esc(cardColor(h)) + '" aria-pressed="false" aria-label="' + esc(v.palabra) + ': flip the card">' +
-      '<span class="flash-in"><span class="face front">' + (small ? "" : '<img class="thumb" src="' + esc(h.portada) + '" alt="">') +
+      '<span class="flash-in"><span class="face front">' + (small ? "" : '<img class="thumb" src="' + esc(thumb(h)) + '" alt="" loading="lazy" decoding="async">') +
       "<strong>" + esc(v.palabra) + "</strong><small>↻ Tap to flip</small></span>" +
-      '<span class="face back"><i class="bim" style="background-image:url(\'' + esc(h.portada) + '\')"></i><span>' + esc(v.significado) + "</span>" + (small ? "" : "<small>" + esc(h.titulo) + "</small>") + "</span></span></button>";
+      '<span class="face back"><i class="bim" style="background-image:url(\'' + esc(thumb(h)) + '\')"></i><span>' + esc(v.significado) + "</span>" + (small ? "" : "<small>" + esc(h.titulo) + "</small>") + "</span></span></button>";
   }
 
   var FX = { song: "note", podcast: "petal", film: "dust", fairy: "dot" };
@@ -230,7 +238,8 @@
     return FX.fairy;
   }
   function particles(h) {
-    var k = fxKind(h), out = "", n = k === "dust" ? 26 : 18, t = h.tema || {};
+    if (LITE || reduce) return "";
+    var k = fxKind(h), out = "", n = Math.round((k === "dust" ? 26 : 18) * (COARSE ? .5 : 1)), t = h.tema || {};
     var petals = [t.accent || "#a586ff", t.accent2 || "#ffcf6e", "#ffffff"];
     for (var i = 0; i < n; i++) {
       var st = "--x:" + (Math.random() * 100).toFixed(1) + "%;--t:" + (12 + Math.random() * 14).toFixed(1) + "s;--d:-" + (Math.random() * 20).toFixed(1) + "s;--dx:" + ((Math.random() - .5) * 220).toFixed(0) + "px;--r:" + ((Math.random() - .5) * 720).toFixed(0) + "deg;";
@@ -258,7 +267,7 @@
       return '<button type="button" class="ph" data-lb="' + esc(p.imagen) + '" data-cap="' + esc(p.pie || "") + '"><img src="' + esc(p.imagen) + '" alt="' + esc(p.pie || "") + '" loading="lazy">' + (p.pie ? "<span>" + esc(p.pie) + "</span>" : "") + "</button>";
     }).join("");
     return '<article class="chapter' + (light ? " light" : "") + '" id="story-' + h.id + '" style="' + theme(h) + '" data-dark="' + (light ? "0" : "1") + '">' +
-      '<div class="ch-backdrop" style="background-image:url(\'' + esc(h.portada) + '\')"></div><div class="ch-fx" aria-hidden="true">' + particles(h) + "</div>" +
+      '<div class="ch-backdrop' + (h.fondo ? "" : " raw") + '" style="background-image:url(\'' + esc(h.fondo || h.portada) + '\')"></div><div class="ch-fx" aria-hidden="true">' + particles(h) + "</div>" +
       '<span class="ch-num" aria-hidden="true">' + pad(i + 1) + "</span>" +
       '<div class="wrap"><header class="ch-head"><span class="ch-kicker">Chapter ' + (i + 1) + ' · <span class="fmt-t">' + esc(h.formato || "Story") + "</span></span>" +
       '<h2 class="ch-title" data-split>' + esc(h.titulo) + "</h2>" + (h.resumen ? '<p class="ch-sum" data-reveal>' + esc(h.resumen) + "</p>" : "") + "</header>" +
@@ -302,7 +311,7 @@
     withV.forEach(function (h) { h.vocabulario.forEach(function (v) { if (v && v.palabra) cards += flash(v, h, false); }); });
     return '<section id="vocabulary" class="band vocab-band"><div class="wrap"><div class="head"><span class="kicker">Flashcards</span><h2 class="title-xl" data-split>Vocabulary</h2>' +
       "<p data-reveal>Read the word, guess the meaning, then flip the card.</p></div>" +
-      (cards ? filterBar("vocab", [{ value: "all", label: "All stories" }].concat(withV.map(function (h) { return { value: h.id, label: h.titulo, img: h.portada }; }))) +
+      (cards ? filterBar("vocab", [{ value: "all", label: "All stories" }].concat(withV.map(function (h) { return { value: h.id, label: h.titulo, img: thumb(h) }; }))) +
         '<div class="cards" id="vocab-cards">' + cards + '</div><p class="vocab-tip">Tip: say each word out loud before you flip it!</p>' : '<p class="soon-txt">Words will appear here soon.</p>') +
       "</div></section>";
   }
@@ -352,7 +361,7 @@
     }).join("");
     var stickers = D.historias.filter(function (h) { return h.actividades.length; }).map(function (h) {
       var sd = h.actividades.filter(function (a) { return done[a.id]; }).length, got = sd === h.actividades.length;
-      return '<div class="sticker' + (got ? " got" : "") + '" data-sticker="' + h.id + '"><img src="' + esc(h.portada) + '" alt=""><span><strong>' + esc(h.titulo) + "</strong><small>" + (got ? "★ Story complete!" : sd + " of " + h.actividades.length + " done") + "</small></span></div>";
+      return '<div class="sticker' + (got ? " got" : "") + '" data-sticker="' + h.id + '"><img src="' + esc(thumb(h)) + '" alt="" loading="lazy" decoding="async"><span><strong>' + esc(h.titulo) + "</strong><small>" + (got ? "★ Story complete!" : sd + " of " + h.actividades.length + " done") + "</small></span></div>";
     }).join("");
     var R = 76, C = (2 * Math.PI * R).toFixed(1);
     return '<div class="prog"><div class="box ring-box"><div class="ring"><svg viewBox="0 0 170 170" aria-hidden="true"><defs><linearGradient id="ringGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffcf6e"/><stop offset=".5" stop-color="#ff8fa8"/><stop offset="1" stop-color="#a586ff"/></linearGradient></defs>' +
@@ -419,8 +428,8 @@
     var r = el.getBoundingClientRect();
     var o = { x: (r.left + r.width / 2) / innerWidth, y: (r.top + r.height / 2) / innerHeight };
     var colors = ["#ffcf6e", "#ff8fa8", "#a586ff", "#8fc2ff", "#7fd6a8"];
-    window.confetti({ particleCount: big ? 160 : 70, spread: big ? 110 : 70, startVelocity: big ? 45 : 32, origin: o, colors: colors, scalar: .9, zIndex: 135, disableForReducedMotion: true });
-    if (big) setTimeout(function () { window.confetti({ particleCount: 120, spread: 160, origin: { x: .5, y: .35 }, colors: colors, zIndex: 135 }); }, 250);
+    window.confetti({ particleCount: Math.round((big ? 160 : 70) * (LITE ? .4 : 1)), spread: big ? 110 : 70, startVelocity: big ? 45 : 32, origin: o, colors: colors, scalar: .9, zIndex: 135, disableForReducedMotion: true });
+    if (big) setTimeout(function () { window.confetti({ particleCount: LITE ? 50 : 120, spread: 160, origin: { x: .5, y: .35 }, colors: colors, zIndex: 135 }); }, 250);
   }
 
   function setDone(id, on, srcEl) {
@@ -511,20 +520,34 @@
   /* nav: solid after the hero, dark over dark sections, current section */
   var top = $("#top");
   var darkSecs = $$(".hero, .picker, .chapter[data-dark='1'], .progress-band, .foot");
-  function navState() {
-    top.classList.toggle("solid", scrollY > 40);
-    var y = (top.offsetHeight || 68) / 2, onDark = false;
-    darkSecs.forEach(function (s) { var r = s.getBoundingClientRect(); if (r.top <= y && r.bottom >= y) onDark = true; });
-    top.classList.toggle("on-dark", onDark);
-    var h = document.documentElement.scrollHeight - innerHeight;
-    $("#scrollbar").style.transform = "scaleX(" + (h > 0 ? scrollY / h : 0) + ")";
-  }
   var navSecs = $$("#links a").map(function (a) { return document.getElementById(a.getAttribute("data-nav")); });
-  function navCurrent() {
-    var mid = innerHeight * .4, cur = null;
-    navSecs.forEach(function (s) { if (!s) return; var r = s.getBoundingClientRect(); if (r.top <= mid) cur = s.id; });
+  var chapters = $$(".chapter"), scrollBarEl = $("#scrollbar");
+  // section positions are measured once (and after every layout change), so scrolling never reads the layout
+  var M = { dark: [], nav: [], ch: [], max: 1, navY: 34 };
+  function span(s) { var r = s.getBoundingClientRect(); return [r.top + scrollY, r.bottom + scrollY]; }
+  function measure() {
+    M.dark = darkSecs.map(span);
+    M.nav = navSecs.map(function (s) { return s ? [s.id, span(s)[0]] : null; }).filter(Boolean);
+    M.ch = chapters.map(span);
+    M.max = Math.max(1, document.documentElement.scrollHeight - innerHeight);
+    M.navY = (top.offsetHeight || 68) / 2;
+  }
+  var lastSolid = null, lastDark = null;
+  function navState() {
+    var y = scrollY, solid = y > 40, onDark = false, ny = y + M.navY;
+    for (var i = 0; i < M.dark.length; i++) if (M.dark[i][0] <= ny && M.dark[i][1] >= ny) { onDark = true; break; }
+    if (solid !== lastSolid) { top.classList.toggle("solid", solid); lastSolid = solid; }
+    if (onDark !== lastDark) { top.classList.toggle("on-dark", onDark); lastDark = onDark; }
+    scrollBarEl.style.transform = "scaleX(" + Math.min(1, y / M.max).toFixed(4) + ")";
+  }
+  var lastCur = "~";
+  function navCurrent(force) {
+    var mid = scrollY + innerHeight * .4, cur = null;
+    M.nav.forEach(function (n) { if (n[1] <= mid) cur = n[0]; });
     // chapters belong to "Stories"
-    $$(".chapter").forEach(function (c) { var r = c.getBoundingClientRect(); if (r.top <= mid && r.bottom > mid) cur = "stories"; });
+    M.ch.forEach(function (c) { if (c[0] <= mid && c[1] > mid) cur = "stories"; });
+    if (cur === lastCur && force !== true) return;
+    lastCur = cur;
     $$("#links a").forEach(function (a) { a.classList.toggle("current", a.getAttribute("data-nav") === cur); });
     movePill();
   }
@@ -538,8 +561,19 @@
   }
   var ticking = false;
   addEventListener("scroll", function () { if (!ticking) { ticking = true; requestAnimationFrame(function () { navState(); navCurrent(); ticking = false; }); } }, { passive: true });
-  addEventListener("resize", function () { navCurrent(); });
-  navState(); navCurrent();
+  function remeasure() { measure(); navState(); navCurrent(true); }
+  addEventListener("resize", remeasure);
+  addEventListener("load", remeasure);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(remeasure);
+  if (ST) ST.addEventListener("refresh", remeasure);
+  measure(); navState(); navCurrent();
+
+  // looping CSS animations (stars, particles, marquee) only run while their section is on screen
+  var loops = $$(".hero, .chapter, .marquee");
+  if ("IntersectionObserver" in window) {
+    var vio = new IntersectionObserver(function (es) { es.forEach(function (e) { e.target.classList.toggle("inview", e.isIntersecting); }); }, { rootMargin: "120px 0px" });
+    loops.forEach(function (s) { vio.observe(s); });
+  } else loops.forEach(function (s) { s.classList.add("inview"); });
 
   /* ================= motion ================= */
   if (!ANIM) { var l = $("#loader"); if (l) l.remove(); return; }
@@ -549,16 +583,17 @@
 
   // split headings into lines/words that rise from a mask
   function splitRise(el, opts) {
-    if (!window.SplitText) return G.from(el, Object.assign({ y: 40, opacity: 0, duration: .9, ease: "power3.out" }, opts));
+    if (!window.SplitText || LITE) return G.from(el, Object.assign({ y: 40, opacity: 0, duration: .9, ease: "power3.out" }, opts));
     var s = new window.SplitText(el, { type: "lines,words", linesClass: "split-line", autoSplit: false });
     return G.from(s.words, Object.assign({ yPercent: 110, rotate: 4, duration: .9, ease: "power4.out", stagger: .05 }, opts));
   }
 
   // loader -> hero intro
   var tl = G.timeline({ defaults: { ease: "power3.out" } });
-  tl.to(".loader-book path", { strokeDashoffset: 0, duration: .8, ease: "power2.inOut" })
-    .from(".loader-name", { y: 20, opacity: 0, duration: .5 }, "-=.45")
-    .to("#loader", { yPercent: -100, duration: .8, ease: "power4.inOut" }, "+=.15")
+  if (LITE) { $("#loader").remove(); }
+  else tl.to(".loader-book path", { strokeDashoffset: 0, duration: .7, ease: "power2.inOut" })
+    .from(".loader-name", { y: 20, opacity: 0, duration: .45 }, "-=.4")
+    .to("#loader", { yPercent: -100, duration: .7, ease: "power4.inOut" }, "+=.1")
     .set("#loader", { display: "none" });
   tl.add(splitRise("#hero-title", { stagger: .07, duration: 1.1 }), "-=.45");
   tl.from("[data-hero]", { y: 30, opacity: 0, stagger: .1, duration: .8 }, "-=.8");
@@ -566,29 +601,46 @@
 
   // hero fan of covers
   mm.add("(min-width: 980px)", function () {
-    var cards = $$(".fan-card"), n = cards.length;
+    var cards = $$(".fan-card"), fan = $("#fan"), hero = $(".hero"), ready = false, mv = null;
     var spots = [{ x: -58, y: -51, r: -7 }, { x: 60, y: -56, r: 5 }, { x: -62, y: 53, r: 4 }, { x: 56, y: 50, r: -6 }];
-    cards.forEach(function (c, i) {
-      var s = spots[i] || spots[0];
-      G.set(c, { xPercent: -50 + s.x, yPercent: -50 + s.y, rotation: s.r, zIndex: i + 1 });
-    });
+    function spot(i) { return spots[i] || spots[0]; }
+    cards.forEach(function (c, i) { var s = spot(i); G.set(c, { xPercent: -50 + s.x, yPercent: -50 + s.y, rotation: s.r, zIndex: i + 1 }); });
     tl.from(cards, { yPercent: 60, rotation: 0, xPercent: -50, opacity: 0, scale: .7, duration: 1.2, stagger: .1, ease: "expo.out" }, "-=1.1");
-    cards.forEach(function (c, i) {
-      c.addEventListener("mouseenter", function () { G.to(c, { scale: 1.1, rotation: 0, zIndex: 10, duration: .4, ease: "power3.out" }); });
-      c.addEventListener("mouseleave", function () { G.to(c, { scale: 1, rotation: (spots[i] || spots[0]).r, zIndex: i + 1, duration: .5, ease: "power3.out" }); });
-    });
-    // gentle float + mouse tilt
-    var fan = $("#fan");
-    G.set(fan, { transformPerspective: 1400, transformStyle: "preserve-3d" });
-    G.to(fan, { y: -12, duration: 3, yoyo: true, repeat: -1, ease: "sine.inOut" });
-    var rx = G.quickTo(fan, "rotationX", { duration: .8, ease: "power3" }), ry = G.quickTo(fan, "rotationY", { duration: .8, ease: "power3" });
-    var glow = $("#hero-glow"), gx = G.quickTo(glow, "left", { duration: .6 }), gy = G.quickTo(glow, "top", { duration: .6 });
-    var hero = $(".hero");
-    function mv(e) { var r = hero.getBoundingClientRect(); var px = (e.clientX - r.left) / r.width - .5, py = (e.clientY - r.top) / r.height - .5; ry(px * 14); rx(-py * 10); gx(e.clientX - r.left); gy(e.clientY - r.top); glow.style.opacity = 1; }
-    hero.addEventListener("mousemove", mv);
-    // the fan drifts away as you scroll
+    tl.call(function () { ready = true; });
+    if (fine && !LITE) {
+      // hover: one card comes to the front at once (z-index is never tweened), the others step back
+      var leaveT = 0;
+      var rest = function () {
+        cards.forEach(function (o, j) { G.to(o, { scale: 1, y: 0, opacity: 1, rotation: spot(j).r, duration: .45, ease: "power3.out", overwrite: "auto" }); });
+      };
+      cards.forEach(function (c) {
+        var on = function () {
+          if (!ready) return;
+          clearTimeout(leaveT);
+          cards.forEach(function (o, j) {
+            if (o === c) return;
+            G.set(o, { zIndex: j + 1 });
+            G.to(o, { scale: .97, y: 0, opacity: .72, rotation: spot(j).r, duration: .35, ease: "power3.out", overwrite: "auto" });
+          });
+          G.set(c, { zIndex: 20 });
+          G.to(c, { scale: 1.08, y: -10, opacity: 1, rotation: 0, duration: .35, ease: "power3.out", overwrite: "auto" });
+        };
+        c.addEventListener("mouseenter", on);
+        c.addEventListener("focus", on);
+        c.addEventListener("mouseleave", function () { clearTimeout(leaveT); leaveT = setTimeout(rest, 90); });
+        c.addEventListener("blur", function () { clearTimeout(leaveT); leaveT = setTimeout(rest, 90); });
+      });
+      // the whole table tilts a little toward the pointer (flat, no 3D sorting between cards)
+      G.set(fan, { transformPerspective: 1400 });
+      var rx = G.quickTo(fan, "rotationX", { duration: .8, ease: "power3" }), ry = G.quickTo(fan, "rotationY", { duration: .8, ease: "power3" });
+      var glow = $("#hero-glow"), gx = G.quickTo(glow, "x", { duration: .6 }), gy = G.quickTo(glow, "y", { duration: .6 });
+      mv = function (e) { var r = hero.getBoundingClientRect(); var px = (e.clientX - r.left) / r.width - .5, py = (e.clientY - r.top) / r.height - .5; ry(px * 10); rx(-py * 7); gx(e.clientX - r.left); gy(e.clientY - r.top); glow.style.opacity = 1; };
+      hero.addEventListener("mousemove", mv);
+    }
+    if (!LITE) G.to(fan, { y: -12, duration: 3, yoyo: true, repeat: -1, ease: "sine.inOut" });
+    // the covers drift away as you scroll
     G.to(fan, { yPercent: 18, opacity: .3, ease: "none", scrollTrigger: { trigger: ".hero", start: "top top", end: "bottom top", scrub: true } });
-    return function () { hero.removeEventListener("mousemove", mv); };
+    return function () { if (mv) hero.removeEventListener("mousemove", mv); };
   });
   mm.add("(max-width: 979px)", function () {
     tl.from(".fan-card", { y: 60, opacity: 0, stagger: .08, duration: .9 }, "-=1");
@@ -596,7 +648,7 @@
   G.to(".hero-text", { yPercent: -12, opacity: .2, ease: "none", scrollTrigger: { trigger: ".hero", start: "top top", end: "bottom top", scrub: true } });
 
   // magnetic buttons
-  if (fine) $$(".magnet").forEach(function (b) {
+  if (fine && !LITE) $$(".magnet").forEach(function (b) {
     var qx = G.quickTo(b, "x", { duration: .4, ease: "power3" }), qy = G.quickTo(b, "y", { duration: .4, ease: "power3" });
     b.addEventListener("mousemove", function (e) { var r = b.getBoundingClientRect(); qx((e.clientX - r.left - r.width / 2) * .3); qy((e.clientY - r.top - r.height / 2) * .35); });
     b.addEventListener("mouseleave", function () { qx(0); qy(0); });
@@ -608,7 +660,7 @@
     ST.create({ trigger: el, start: "top 85%", once: true, onEnter: function () { tw.play(); } });
   });
   ST.batch("[data-reveal]", { start: "top 88%", once: true, onEnter: function (b) { G.from(b, { y: 36, opacity: 0, duration: .9, stagger: .12, ease: "power3.out" }); } });
-  ST.batch("[data-pop]", { start: "top 88%", once: true, onEnter: function (b) { G.from(b, { y: 60, opacity: 0, rotation: function (i) { return i % 2 ? 6 : -6; }, scale: .9, duration: 1, stagger: .12, ease: "back.out(1.6)" }); } });
+  ST.batch("[data-pop]", { start: "top 88%", once: true, onEnter: function (b) { G.from(b, LITE ? { y: 40, opacity: 0, duration: .6, stagger: .08 } : { y: 60, opacity: 0, rotation: function (i) { return i % 2 ? 6 : -6; }, scale: .9, duration: 1, stagger: .12, ease: "back.out(1.6)" }); } });
   ST.batch(".obj-ic", { start: "top 90%", once: true, onEnter: function (b) { G.from(b, { scale: 0, rotation: -90, duration: .8, stagger: .08, ease: "back.out(2)" }); } });
 
   // horizontal story picker (pinned on desktop)
@@ -620,7 +672,7 @@
       scrollTrigger: { trigger: pin, start: "center center", end: function () { return "+=" + dist(); }, pin: true, scrub: .8, invalidateOnRefresh: true, anticipatePin: 1 } });
     $$(".pick", track).forEach(function (p) {
       G.from($(".pick-in", p), { y: 40, opacity: 0, duration: .8, ease: "power3.out", scrollTrigger: { trigger: p, containerAnimation: tw, start: "left 85%", toggleActions: "play none none reverse" } });
-      G.fromTo($(".pick-im", p), { xPercent: -5 }, { xPercent: 5, ease: "none", scrollTrigger: { trigger: p, containerAnimation: tw, start: "left right", end: "right left", scrub: true } });
+      if (!LITE) G.fromTo($(".pick-im", p), { xPercent: -5 }, { xPercent: 5, ease: "none", scrollTrigger: { trigger: p, containerAnimation: tw, start: "left right", end: "right left", scrub: true } });
     });
     return function () { $(".picker").classList.remove("pinned"); };
   });
@@ -629,14 +681,13 @@
   // chapters: the cover opens like a curtain, image parallax, cards deal in
   $$(".chapter").forEach(function (ch) {
     var stage = $("[data-stage]", ch), img = $(".stage-img", ch);
-    G.fromTo(stage, { clipPath: "inset(10% 14% 10% 14% round 40px)" }, { clipPath: "inset(0% 0% 0% 0% round 26px)", ease: "none", scrollTrigger: { trigger: stage, start: "top 95%", end: "top 35%", scrub: true } });
-    G.fromTo(img, { yPercent: -6, scale: 1.15 }, { yPercent: 6, scale: 1, ease: "none", scrollTrigger: { trigger: stage, start: "top bottom", end: "bottom top", scrub: true } });
-    G.from($(".ch-num", ch), { yPercent: 40, opacity: 0, ease: "none", scrollTrigger: { trigger: ch, start: "top bottom", end: "top 20%", scrub: true } });
+    G.fromTo(stage, { scale: .86, opacity: .4 }, { scale: 1, opacity: 1, ease: "none", scrollTrigger: { trigger: stage, start: "top 95%", end: "top 45%", scrub: true } });
+    if (!LITE) G.fromTo(img, { yPercent: -6, scale: 1.15 }, { yPercent: 6, scale: 1, ease: "none", scrollTrigger: { trigger: stage, start: "top bottom", end: "bottom top", scrub: true } });
+    if (!LITE) G.from($(".ch-num", ch), { yPercent: 40, opacity: 0, ease: "none", scrollTrigger: { trigger: ch, start: "top bottom", end: "top 20%", scrub: true } });
     G.from($(".ch-kicker", ch), { x: -30, opacity: 0, duration: .7, ease: "power3.out", scrollTrigger: { trigger: ch, start: "top 75%", once: true } });
-    G.from($(".ch-backdrop", ch), { scale: 1.3, ease: "none", scrollTrigger: { trigger: ch, start: "top bottom", end: "bottom top", scrub: true } });
     var acts = $$(".act", ch);
-    if (acts.length) G.from(acts, { y: 90, rotationX: -25, rotation: function (i) { return (i % 2 ? 1 : -1) * 4; }, opacity: 0, duration: 1, stagger: .12, ease: "power3.out", transformPerspective: 900,
-      scrollTrigger: { trigger: $(".acts", ch), start: "top 85%", once: true } });
+    if (acts.length) G.from(acts, Object.assign(LITE ? { y: 50, opacity: 0, duration: .6, stagger: .08, ease: "power2.out" } : { y: 90, rotationX: -25, rotation: function (i) { return (i % 2 ? 1 : -1) * 4; }, opacity: 0, duration: 1, stagger: .12, ease: "power3.out", transformPerspective: 900 }, {
+      scrollTrigger: { trigger: $(".acts", ch), start: "top 85%", once: true } }));
     var minis = $$(".mini-words .flash", ch);
     if (minis.length) ST.create({ trigger: minis[0], start: "top 85%", once: true, onEnter: function () {
       // a little teaser: the first card flips and flips back
@@ -646,7 +697,7 @@
   });
 
   // activity cards tilt toward the pointer
-  if (fine) $$(".act").forEach(function (a) {
+  if (fine && !LITE) $$(".act").forEach(function (a) {
     var rx = G.quickTo(a, "rotationX", { duration: .5, ease: "power3" }), ry = G.quickTo(a, "rotationY", { duration: .5, ease: "power3" });
     G.set(a, { transformPerspective: 900 });
     a.addEventListener("mousemove", function (e) { var r = a.getBoundingClientRect(); ry(((e.clientX - r.left) / r.width - .5) * 10); rx(-((e.clientY - r.top) / r.height - .5) * 10); });
@@ -654,7 +705,7 @@
   });
 
   // vocabulary + index cards deal in
-  ST.batch(".cards .flash", { start: "top 92%", once: true, onEnter: function (b) { G.from(b, { y: 70, rotation: function () { return (Math.random() - .5) * 16; }, opacity: 0, duration: .8, stagger: .06, ease: "back.out(1.5)" }); } });
+  ST.batch(".cards .flash", { start: "top 92%", once: true, onEnter: function (b) { G.from(b, LITE ? { y: 40, opacity: 0, duration: .5, stagger: .04 } : { y: 70, rotation: function () { return (Math.random() - .5) * 16; }, opacity: 0, duration: .8, stagger: .06, ease: "back.out(1.5)" }); } });
   ST.batch(".ix", { start: "top 94%", once: true, onEnter: function (b) { G.from(b, { x: -30, opacity: 0, duration: .6, stagger: .05, ease: "power3.out" }); } });
   ST.batch(".filters", { start: "top 92%", once: true, onEnter: function (b) { G.from($$(".filter", b[0]), { y: 20, opacity: 0, stagger: .05, duration: .5, ease: "power3.out" }); } });
 
@@ -663,7 +714,7 @@
     var v = $("#ring-val"), num = $("#ring-num"), c = counts();
     if (v) { var full = parseFloat(v.getAttribute("stroke-dasharray")); G.fromTo(v, { attr: { "stroke-dashoffset": full } }, { attr: { "stroke-dashoffset": full * (1 - c.p / 100) }, duration: 1.6, ease: "power3.out" }); }
     var o = { n: 0 }; G.to(o, { n: c.p, duration: 1.6, ease: "power3.out", onUpdate: function () { num.textContent = Math.round(o.n) + "%"; } });
-    $$("#prog-body .bar span").forEach(function (s) { var w = s.style.width; G.fromTo(s, { width: 0 }, { width: w, duration: 1.2, ease: "power3.out", delay: .2 }); });
+    G.from("#prog-body .bar span", { scaleX: 0, transformOrigin: "0 50%", duration: 1.2, ease: "power3.out", delay: .2, stagger: .04 });
     G.from("#prog-body .sticker", { scale: .6, opacity: 0, stagger: .1, duration: .7, ease: "back.out(2)" });
   } });
 
