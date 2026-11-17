@@ -494,7 +494,7 @@ section[id], article[id], [id^="act-"] { scroll-margin-top: calc(var(--nav-h) + 
 .tv-size { flex: none; width: 40px; height: 40px; border-radius: 50%; border: 1px solid color-mix(in srgb, var(--ink2) 22%, transparent); background: none; color: inherit; cursor: pointer; font-family: var(--display); font-weight: 800; font-size: .8rem; }
 .tv-size span { font-size: 1.35em; }
 .tv-size[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
-.tv-nav { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; padding: 2px 0; -webkit-mask-image: linear-gradient(90deg, #000 88%, transparent); mask-image: linear-gradient(90deg, #000 88%, transparent); }
+.tv-nav { position: relative; display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; padding: 2px 0; -webkit-mask-image: linear-gradient(90deg, #000 88%, transparent); mask-image: linear-gradient(90deg, #000 88%, transparent); }
 .tv-nav::-webkit-scrollbar { display: none; }
 .tv-nav button { flex: none; border: 1px solid color-mix(in srgb, var(--accent) 55%, transparent); background: none; color: inherit; border-radius: 999px; padding: .32em .85em; font-size: .82rem; font-weight: 700; cursor: pointer; white-space: nowrap; transition: background .25s, color .25s; }
 .tv-nav button[aria-current="true"] { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }

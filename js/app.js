@@ -653,9 +653,10 @@
     var secs = $$(".tv-sec", body), btns = $$("[data-go]", nav), tick = false, last = -1;
     function upd() {
       tick = false;
+      if (!body.clientHeight) return;
       var top = body.getBoundingClientRect().top + 40, cur = 0;
       secs.forEach(function (s, i) { if (s.getBoundingClientRect().top <= top) cur = i; });
-      if (body.scrollTop + body.clientHeight >= body.scrollHeight - 4) cur = secs.length - 1;
+      if (body.scrollTop > 0 && body.scrollTop + body.clientHeight >= body.scrollHeight - 4) cur = secs.length - 1;
       if (cur === last) return;
       last = cur;
       btns.forEach(function (b) { var on = +b.getAttribute("data-go") === cur; b.setAttribute("aria-current", on); if (on) nav.scrollTo({ left: b.offsetLeft - 24, behavior: reduce ? "auto" : "smooth" }); });
@@ -688,6 +689,7 @@
     lastFocus = document.activeElement;
     th.hidden = false; document.body.classList.add("th-open");
     $$(".tv", th).forEach(spy);
+    setTimeout(function () { $$(".tv-body", th).forEach(function (bd) { if (bd._upd) bd._upd(); }); }, 650);
     $(".th-x", th).focus();
     if (ANIM) { G.fromTo(th, { opacity: 0 }, { opacity: 1, duration: .3 }); G.from($(".th-in", th), { y: 30, scale: .98, duration: .5, ease: "power3.out", clearProps: "transform" }); }
   }
