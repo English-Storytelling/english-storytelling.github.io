@@ -266,10 +266,14 @@
       if (!l) return;
       if (/^##/.test(l)) { sec(l.replace(/^##\s*/, "")); return; }
       if (!cur) sec("");
+      var tm = l.match(/^\[(\d{1,2}):(\d{1,2}(?:\.\d+)?)\]\s*/), at = null;
+      if (tm) { at = +tm[1] * 60 + +tm[2]; l = l.slice(tm[0].length); }
+      var n0 = cur.items.length;
       if (/^>/.test(l)) cur.items.push({ k: "call", t: l.replace(/^>\s*/, "") });
       else if ((m = l.match(/^\[(SOUND|VISUAL|MUSIC)\s*:\s*(.*?)\]?$/i))) cur.items.push({ k: "cue", c: m[1].toLowerCase(), t: m[2] });
       else if ((m = l.match(/^([A-Z][A-Z .'-]{1,24}):\s*(.*)$/))) cur.items.push({ k: "say", who: m[1].trim(), t: m[2] });
       else cur.items.push({ k: "line", t: l });
+      if (at !== null && cur.items.length > n0) cur.items[cur.items.length - 1].at = at;
     });
     return secs.filter(function (s) { return s.items.length; });
   }
@@ -286,6 +290,7 @@
     if (q) s = s.replace(new RegExp("(<[^>]+>)|(" + rx(esc(q)) + ")", "gi"), function (m, tag, hit) { return tag || '<mark class="hit">' + hit + "</mark>"; });
     return s;
   }
+  function clock(t) { t = Math.floor(t); return Math.floor(t / 60) + ":" + pad(t % 60); }
   function isSong(h) { return /song|music/.test(slug(h.formato)); }
   function scriptLabel(h) { var f = slug(h.formato); return /song|music/.test(f) ? "Lyrics" : /fairy|tale/.test(f) ? "Story" : "Script"; }
   function storyById(id) { return D.historias.filter(function (x) { return x.id === id; })[0]; }
@@ -298,21 +303,23 @@
     var body = secs.map(function (s, i) {
       return '<section class="tv-sec' + (/chorus/i.test(s.title) ? " chorus" : "") + '" data-sec="' + i + '">' + (s.title ? "<h5>" + esc(s.title) + "</h5>" : "") +
         s.items.map(function (it) {
+          var ta = it.at != null ? ' data-t="' + it.at + '" title="Jump to ' + clock(it.at) + '"' : "", tc = it.at != null ? " timed" : "";
           if (it.k === "say") {
             if (!whos[it.who]) whos[it.who] = WHO_COLORS[wi++ % WHO_COLORS.length];
-            return '<p class="tv-say" style="--who:' + whos[it.who] + '"><b class="who">' + esc(cap(it.who.toLowerCase())) + "</b>" + tx(it.t) + "</p>";
+            return '<p class="tv-say' + tc + '"' + ta + ' style="--who:' + whos[it.who] + '"><b class="who">' + esc(cap(it.who.toLowerCase())) + "</b>" + tx(it.t) + "</p>";
           }
-          if (it.k === "cue") return '<p class="tv-cue"><i aria-hidden="true">' + (it.c === "sound" ? "🔊" : it.c === "music" ? "🎵" : "🎬") + "</i>" + tx(it.t) + "</p>";
-          if (it.k === "call") return '<blockquote class="tv-call">' + tx(it.t) + "</blockquote>";
-          return '<p class="tv-line">' + tx(it.t) + "</p>";
+          if (it.k === "cue") return '<p class="tv-cue' + tc + '"' + ta + '><i aria-hidden="true">' + (it.c === "sound" ? "🔊" : it.c === "music" ? "🎵" : "🎬") + "</i>" + tx(it.t) + "</p>";
+          if (it.k === "call") return '<blockquote class="tv-call' + tc + '"' + ta + ">" + tx(it.t) + "</blockquote>";
+          return '<p class="tv-line' + tc + '"' + ta + ">" + tx(it.t) + "</p>";
         }).join("") + "</section>";
     }).join("");
-    return '<div class="tv' + (isSong(h) ? " song" : "") + '" data-tv="' + h.id + '">' +
+    var timed = /\n?\s*\[\d{1,2}:\d/.test(String(h.transcripcion));
+    return '<div class="tv' + (isSong(h) ? " song" : "") + (timed ? " has-time" : "") + '" data-tv="' + h.id + '">' +
       '<div class="tv-tools"><label class="tv-search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.2-4.2"/></svg>' +
       '<input type="search" placeholder="Find a word…" aria-label="Find a word in the ' + scriptLabel(h).toLowerCase() + '"></label><span class="tv-count" aria-live="polite"></span>' +
       '<button type="button" class="tv-size" aria-pressed="false" title="Bigger text" aria-label="Bigger text">A<span>A</span></button></div>' +
       nav + '<div class="tv-body" tabindex="0" aria-label="' + esc(scriptLabel(h)) + '">' + body + "</div>" +
-      (V ? '<p class="tv-hint"><span class="vw-demo">Wavy words</span> are key words: touch one to see what it means.</p>' : "") + "</div>";
+      ((timed || V) ? '<p class="tv-hint">' + (timed ? "▶ The text follows the video. Tap a line to jump to that moment. " : "") + (V ? '<span class="vw-demo">Wavy words</span> are key words: touch one to see what it means.' : "") + "</p>" : "") + "</div>";
   }
 
   // the story kit next to the video: before / lyrics-script-story / after
@@ -587,12 +594,15 @@
     var stage = btn.closest(".stage"), id = btn.getAttribute("data-yt");
     stage._btn = btn.outerHTML;
     var f = document.createElement("iframe");
-    f.src = "https://www.youtube-nocookie.com/embed/" + id + "?autoplay=1&rel=0&modestbranding=1";
+    f.src = ytSrc(id, btn._start);
     f.title = "Video"; f.allow = "autoplay; encrypted-media; picture-in-picture; fullscreen"; f.allowFullscreen = true;
     stage.classList.add("playing");
     if (ANIM) { G.to(btn, { scale: .6, opacity: 0, duration: .3, onComplete: function () { btn.remove(); } }); G.from(f, { opacity: 0, duration: .6, delay: .2 }); }
     else btn.remove();
     stage.appendChild(f);
+    // a story with a timed transcript: show it next to the video and let it follow
+    var ch = stage.closest(".chapter"), kt = ch && $(".kit", ch), tv = kt && $(".tv.has-time", kt);
+    if (tv) { setTab(kt, "text"); attachSync(f, tv); }
   }
 
   function filterBy(group, value) {
@@ -680,7 +690,7 @@
     stopInline();
     var url = cleanUrl(h.media.url), yt = ytId(url), th = $("#theater");
     var screen = yt
-      ? '<iframe src="https://www.youtube-nocookie.com/embed/' + yt + '?autoplay=1&rel=0&modestbranding=1" title="' + esc(h.titulo) + '" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe>'
+      ? '<iframe src="' + ytSrc(yt) + '" title="' + esc(h.titulo) + '" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe>'
       : '<img src="' + esc(h.portada) + '" alt="">' + (url ? '<a class="play-big" href="' + esc(url) + '" target="_blank" rel="noopener"><span class="play-ring"><svg viewBox="0 0 24 24"><path d="M7 4.5v15l12.5-7.5z" fill="currentColor"/></svg></span><span>' + esc(mediaVerb(h)) + "<small>" + esc(platform(url)) + " · opens in a new tab</small></span></a>"
         : '<span class="soon-badge"><i></i>' + esc(cap(h.formato || "Media")) + " coming soon · read it below</span>");
     th.setAttribute("style", theme(h));
@@ -689,6 +699,8 @@
     lastFocus = document.activeElement;
     th.hidden = false; document.body.classList.add("th-open");
     $$(".tv", th).forEach(spy);
+    var tf = $("iframe", th), ttv = $(".tv.has-time", th);
+    if (tf && ttv) attachSync(tf, ttv);
     setTimeout(function () { $$(".tv-body", th).forEach(function (bd) { if (bd._upd) bd._upd(); }); }, 650);
     $(".th-x", th).focus();
     if (ANIM) { G.fromTo(th, { opacity: 0 }, { opacity: 1, duration: .3 }); G.from($(".th-in", th), { y: 30, scale: .98, duration: .5, ease: "power3.out", clearProps: "transform" }); }
@@ -700,6 +712,62 @@
     if (lastFocus && lastFocus.focus) lastFocus.focus();
   }
   $$(".kit .tv").forEach(spy);
+
+
+  /* ---------- the transcript follows the video (YouTube IFrame API) ---------- */
+  function ytSrc(id, start) {
+    var o = /^https?:/.test(location.origin) ? "&origin=" + encodeURIComponent(location.origin) : "";
+    return "https://www.youtube-nocookie.com/embed/" + id + "?autoplay=1&rel=0&modestbranding=1&playsinline=1&enablejsapi=1" + o + (start ? "&start=" + Math.floor(start) : "");
+  }
+  var ytWait = [];
+  function loadYT(cb) {
+    if (window.YT && window.YT.Player) return cb();
+    ytWait.push(cb);
+    if (loadYT.on) return;
+    loadYT.on = true;
+    var prev = window.onYouTubeIframeAPIReady;
+    window.onYouTubeIframeAPIReady = function () { if (prev) prev(); ytWait.splice(0).forEach(function (f) { f(); }); };
+    var sc = document.createElement("script"); sc.src = "https://www.youtube.com/iframe_api"; sc.async = true; document.head.appendChild(sc);
+  }
+  function attachSync(iframe, tv) {
+    tv._lines = $$(".timed", tv).map(function (el) { return { el: el, t: +el.getAttribute("data-t") }; }).sort(function (a, b) { return a.t - b.t; });
+    if (!tv._lines.length) return;
+    var body = $(".tv-body", tv);
+    if (!body._touch) { body._touch = true; ["wheel", "touchmove", "keydown"].forEach(function (ev) { body.addEventListener(ev, function () { tv._hand = Date.now(); }, { passive: true }); }); }
+    loadYT(function () {
+      if (!document.contains(iframe)) return;
+      var pl = new window.YT.Player(iframe, { events: { onReady: function () { tv._player = pl; } } });
+      var last = -1, iv = setInterval(function () {
+        if (!document.contains(iframe)) { clearInterval(iv); tv.classList.remove("syncing"); tv._player = null; return; }
+        if (!pl.getCurrentTime) return;
+        var now = pl.getCurrentTime() || 0;
+        if (now === last) return;
+        last = now; follow(tv, now);
+      }, 250);
+    });
+  }
+  function follow(tv, now) {
+    var L = tv._lines, k = -1;
+    for (var i = 0; i < L.length; i++) if (L[i].t <= now + .15) k = i;
+    if (!tv.classList.contains("syncing")) tv.classList.add("syncing");
+    if (k === tv._k) return;
+    tv._k = k;
+    L.forEach(function (x, i) { x.el.classList.toggle("now", i === k); x.el.classList.toggle("past", i < k); });
+    // keep the line in view, unless the reader is scrolling on their own
+    if (k >= 0 && (!tv._hand || Date.now() - tv._hand > 4000)) {
+      var body = $(".tv-body", tv), el = L[k].el;
+      body.scrollTo({ top: el.getBoundingClientRect().top - body.getBoundingClientRect().top + body.scrollTop - body.clientHeight * .3, behavior: reduce ? "auto" : "smooth" });
+    }
+  }
+  // tap a line: the video jumps there (and starts, if it was not playing yet)
+  document.addEventListener("click", function (e) {
+    var ln = e.target.closest && e.target.closest(".timed");
+    if (!ln || e.target.closest(".vw")) return;
+    var tv = ln.closest(".tv"), t = +ln.getAttribute("data-t");
+    if (tv._player && tv._player.seekTo) { tv._player.seekTo(t, true); if (tv._player.playVideo) tv._player.playVideo(); tv._hand = 0; follow(tv, t); return; }
+    var ch = tv.closest(".chapter"), btn = ch && $(".stage [data-yt]", ch);
+    if (btn) { btn._start = t; playVideo(btn); }
+  });
 
   /* menu */
   var menuBtn = $("#menu-btn"), links = $("#links");

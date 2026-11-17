@@ -81,42 +81,42 @@ window.SITE = {
       resumen: "A song about a girl who changed herself to fit in, and about learning to accept and love yourself just as you are.",
       media: { url: "https://www.youtube.com/watch?v=G5urVbTEc5w", boton: "" },
       transcripcion: `## Verse 1
-Every morning, I looked in the mirror and hated my face
-While my old friends waited on the bench, I walked away
-I laughed at jokes that were not funny when Lucas walked by
-I wanted him to notice me, so I hid who I was inside
+[0:00] Every morning, I looked in the mirror and hated my face
+[0:05] While my old friends waited on the bench, I walked away
+[0:09.1] I laughed at jokes that were not funny when Lucas walked by
+[0:13.3] I wanted him to notice me, so I hid who I was inside
 
 ## Pre-Chorus
-I was pretending all day, and I lost my own voice
-I changed to fit in, but it was never my choice
+[0:17.6] I was pretending all day, and I lost my own voice
+[0:23.1] I changed to fit in, but it was never my choice
 
 ## Chorus
-Even when life is difficult, I can learn to accept myself
-I can love myself, I don't need their approval
-I am enough just as I am, I don't need a perfect face
-Even when life is difficult, I can find my place
+[0:29.6] Even when life is difficult, I can learn to accept myself
+[0:34.3] I can love myself, I don't need their approval
+[0:38.7] I am enough just as I am, I don't need a perfect face
+[0:43] Even when life is difficult, I can find my place
 
 ## Verse 2
-When Lucas cried behind the gym, he told me he was gay
-I dreamed of being with him, but my dream faded away
-Dad had someone else, and Mom found my diary on the floor
-She read the pain I kept inside and waited by the door
+[0:56.7] When Lucas cried behind the gym, he told me he was gay
+[1:01.1] I dreamed of being with him, but my dream faded away
+[1:05.4] Dad had someone else, and Mom found my diary on the floor
+[1:09.9] She read the pain I kept inside and waited by the door
 
 ## Pre-Chorus
-I was pretending all day, and I lost my own voice
-I changed to fit in, but it was never my choice
+[1:14.5] I was pretending all day, and I lost my own voice
+[1:19.2] I changed to fit in, but it was never my choice
 
 ## Chorus
-Even when life is difficult, I can learn to accept myself
-I can love myself, I don't need their approval
-I am enough just as I am, I don't need a perfect face
-Even when life is difficult, I can find my place
+[1:27.8] Even when life is difficult, I can learn to accept myself
+[1:32.2] I can love myself, I don't need their approval
+[1:37] I am enough just as I am, I don't need a perfect face
+[1:41.2] Even when life is difficult, I can find my place
 
 ## Final Chorus
-Even when life is difficult, I can learn to accept myself
-I can love myself, I don't need their approval
-I am enough just as I am, I don't need a perfect face
-Even when life is difficult, I can find my place`,
+[2:03.5] Even when life is difficult, I can learn to accept myself
+[2:07.9] I can love myself, I don't need their approval
+[2:12.9] I am enough just as I am, I don't need a perfect face
+[2:17.4] Even when life is difficult, I can find my place`,
       reflexion: [],
       enfoque: {
         gramatica: ["Present simple vs. present continuous", "Modal verbs: can, could, will", "Comparative adjectives"],
@@ -250,37 +250,37 @@ ALL THREE: Shhhhh!
       resumen: "Daniela finds a pocket watch that takes her back five minutes in time. Can she discover what Dr. Vargas is hiding and save her mother before time runs out?",
       media: { url: "https://youtu.be/6cYUwizHGec", boton: "" },
       transcripcion: `## Opening scene (two years earlier)
-The room is white and quiet. Marta lies on a bed with her eyes closed. She is nervous, but she smiles a little. She trusts the doctor.
-Dr. Vargas stands next to a small table. On the table there is a paper with the words test product. She takes two small bottles. One has a green label. The other has no label. She looks at the green bottle for a long time. Then she puts it in a drawer. She fills the syringe with the other bottle. The liquid shines under the white light. Nobody will ever know, she says.
-Dr. Vargas looks at Marta and smiles. It is a cold smile. Marta opens her eyes and smiles back. The needle comes close to her face.
-The screen goes black.
+[0:08] The room is white and quiet. Marta lies on a bed with her eyes closed. She is nervous, but she smiles a little. She trusts the doctor.
+[0:18] Dr. Vargas stands next to a small table. On the table there is a paper with the words test product. She takes two small bottles. One has a green label. The other has no label. She looks at the green bottle for a long time. Then she puts it in a drawer. She fills the syringe with the other bottle. The liquid shines under the white light. Nobody will ever know, she says.
+[0:55] Dr. Vargas looks at Marta and smiles. It is a cold smile. Marta opens her eyes and smiles back. The needle comes close to her face.
+[1:19] The screen goes black.
 
 ## Exposition
-Daniela is in a room. She is twenty-one and she studies architecture. At university nobody knows her name. She always sits alone in the last row. Her mother, Marta, is the only person who makes her feel special. Daniela closes her eyes and remembers her mother’s hug. It was warm and soft, and it feels very far away. Now Marta is in the hospital. She is weak, and the machine next to her makes a slow sound.
-On the bed table there is a hospital report. Daniela reads it with shaking hands. It says the doctor used a cheap and dangerous product on purpose to save money. Marta looks at her daughter and cries, because the treatment is too expensive for them.
-A few days later, Daniela goes to her grandfather’s old house. In an old trunk she finds a silver watch and a yellow note that says: Five minutes can save a life. Use them carefully.
-She puts the watch on. In the street, a car horn sounds. Daniela presses the crown. A white flash fills the room. Now she is in the same place, five minutes earlier, and the same car horn sounds again. Her eyes open wide. It really works. She learns the rules. The watch goes back five minutes. Only she remembers. Only she sees the flash. She can use it once a day. That night she looks at her sleeping mother and has a terrible idea: Dr. Vargas has a lot of money, and I have time.
+[1:20] Daniela is in a room. She is twenty-one and she studies architecture. At university nobody knows her name. She always sits alone in the last row. Her mother, Marta, is the only person who makes her feel special. Daniela closes her eyes and remembers her mother’s hug. It was warm and soft, and it feels very far away. Now Marta is in the hospital. She is weak, and the machine next to her makes a slow sound.
+[1:38] On the bed table there is a hospital report. Daniela reads it with shaking hands. It says the doctor used a cheap and dangerous product on purpose to save money. Marta looks at her daughter and cries, because the treatment is too expensive for them.
+[1:54] A few days later, Daniela goes to her grandfather’s old house. In an old trunk she finds a silver watch and a yellow note that says: Five minutes can save a life. Use them carefully.
+[2:33] She puts the watch on. In the street, a car horn sounds. Daniela presses the crown. A white flash fills the room. Now she is in the same place, five minutes earlier, and the same car horn sounds again. Her eyes open wide. It really works. She learns the rules. The watch goes back five minutes. Only she remembers. Only she sees the flash. She can use it once a day. That night she looks at her sleeping mother and has a terrible idea: Dr. Vargas has a lot of money, and I have time.
 
 ## Rising action
-First night. Daniela climbs the wall of Dr. Vargas’s big house. She feels confident, and she goes in and walks slowly. Suddenly a camera turns and a red light points at her. Daniela presses the watch. Flash. She is at the garage door again, five minutes earlier. Only she remembers what happened, so now she knows where the camera is. This time she walks a different way and hides from the red light. She does not find money, but in the kitchen she finds a paper that says: Test product, twenty units, cheapest price. It is her first clue.
-Second night. Dr. Vargas is not at home, so Daniela goes to the office. She opens the desk and reads some papers. There is a list of patients, and next to Marta’s name there are two words: test product. On the wall there is a big mirror. Daniela sees a pale girl in a dark jacket. She looks like a stranger. Then she hears steps. Dr. Vargas comes back early. She sees Daniela, takes a knife from the desk, and stabs her. Daniela screams. She presses the watch. Flash. She is at the garage door, five minutes earlier. She touches her side and breathes fast. There is no wound. Now she knows that Dr. Vargas comes back early. She goes to the office again, takes a photo of the papers, and runs away before the doctor arrives. Now she has another clue, but she is afraid.
-Third night. Dr. Vargas is at a party, so Daniela looks in the drawers of the bedroom, one by one. In the last drawer she finds a small box. Inside there are bottles with no labels. On the box there is a sticker: Test product. This is the proof. Then her phone makes a sound. It is a message from the hospital: her mother is very bad, please come now. Daniela falls on her knees and cries. What am I doing? What am I becoming? She takes the box and leaves.
+[3:10] First night. Daniela climbs the wall of Dr. Vargas’s big house. She feels confident, and she goes in and walks slowly. Suddenly a camera turns and a red light points at her. Daniela presses the watch. Flash. She is at the garage door again, five minutes earlier. Only she remembers what happened, so now she knows where the camera is. This time she walks a different way and hides from the red light. She does not find money, but in the kitchen she finds a paper that says: Test product, twenty units, cheapest price. It is her first clue.
+[4:17] Second night. Dr. Vargas is not at home, so Daniela goes to the office. She opens the desk and reads some papers. There is a list of patients, and next to Marta’s name there are two words: test product. On the wall there is a big mirror. Daniela sees a pale girl in a dark jacket. She looks like a stranger. Then she hears steps. Dr. Vargas comes back early. She sees Daniela, takes a knife from the desk, and stabs her. Daniela screams. She presses the watch. Flash. She is at the garage door, five minutes earlier. She touches her side and breathes fast. There is no wound. Now she knows that Dr. Vargas comes back early. She goes to the office again, takes a photo of the papers, and runs away before the doctor arrives. Now she has another clue, but she is afraid.
+[5:59] Third night. Dr. Vargas is at a party, so Daniela looks in the drawers of the bedroom, one by one. In the last drawer she finds a small box. Inside there are bottles with no labels. On the box there is a sticker: Test product. This is the proof. Then her phone makes a sound. It is a message from the hospital: her mother is very bad, please come now. Daniela falls on her knees and cries. What am I doing? What am I becoming? She takes the box and leaves.
 
 ## Climax
-Fourth night. Daniela comes back, but not for money. She comes for the truth. In the office, the computer is on. She finds a video called Test 14. On the screen she sees a white room, Marta on the bed, and Dr. Vargas with a syringe. It is the video of the operation. Dr. Vargas recorded everything, like an experiment. Daniela’s hands shake. She decides to upload the video to the internet from that same computer. The bar goes up to one hundred percent.
-Then she hears steps. The door opens. Dr. Vargas sees the computer on and walks closer. Then she sees Daniela in the mirror. She is very angry. She takes her phone, calls the emergency number, and throws the phone on the sofa with the call still open. Then she jumps on Daniela.
-They fight. The watch flies and hits the floor, and the glass breaks. Daniela finds the watch and presses the crown again and again, but it does not work. She cannot go back in time anymore.
-On the sofa, the phone is still on the call. Far away, police officers listen in silence to the hits and the shouts. They drive fast. Soon red and blue lights move on the walls of the house. The front door opens and police officers run in. They separate the two women and put handcuffs on both of them. Dr. Vargas pulls and shouts. Daniela does not move. She just looks at her broken watch on the floor.
+[7:34] Fourth night. Daniela comes back, but not for money. She comes for the truth. In the office, the computer is on. She finds a video called Test 14. On the screen she sees a white room, Marta on the bed, and Dr. Vargas with a syringe. It is the video of the operation. Dr. Vargas recorded everything, like an experiment. Daniela’s hands shake. She decides to upload the video to the internet from that same computer. The bar goes up to one hundred percent.
+[8:28] Then she hears steps. The door opens. Dr. Vargas sees the computer on and walks closer. Then she sees Daniela in the mirror. She is very angry. She takes her phone, calls the emergency number, and throws the phone on the sofa with the call still open. Then she jumps on Daniela.
+[8:55] They fight. The watch flies and hits the floor, and the glass breaks. Daniela finds the watch and presses the crown again and again, but it does not work. She cannot go back in time anymore.
+[9:38] On the sofa, the phone is still on the call. Far away, police officers listen in silence to the hits and the shouts. They drive fast. Soon red and blue lights move on the walls of the house. The front door opens and police officers run in. They separate the two women and put handcuffs on both of them. Dr. Vargas pulls and shouts. Daniela does not move. She just looks at her broken watch on the floor.
 
 ## Resolution
-Outside, an officer lets Daniela read her phone. A message from the hospital says her mother is dead. Daniela feels two things at the same time: deep sadness, because she could not save her mother, and peace, because everybody can now see the truth. But she knows she also did wrong things to get it.
-In the window of the police car, she sees her face. It is the same face from the mirror, but now it does not look like a stranger.
+[10:05] Outside, an officer lets Daniela read her phone. A message from the hospital says her mother is dead. Daniela feels two things at the same time: deep sadness, because she could not save her mother, and peace, because everybody can now see the truth. But she knows she also did wrong things to get it.
+[10:20] In the window of the police car, she sees her face. It is the same face from the mirror, but now it does not look like a stranger.
 
 ## Reflection
-> Daniela could go back five minutes, but she could never go back on her choices. She wanted justice, and she almost became the person she hated.
+[10:28] > Daniela could go back five minutes, but she could never go back on her choices. She wanted justice, and she almost became the person she hated.
 
 ## The final message
-> If you could go back five minutes, what would you change? You cannot control every situation, but you can choose how to face it.`,
+[10:40] > If you could go back five minutes, what would you change? You cannot control every situation, but you can choose how to face it.`,
       reflexion: ["Daniela could go back five minutes, but she could never go back on her choices. She wanted justice, and she almost became the person she hated.", "If you could go back five minutes, what would you change? You cannot control every situation, but you can choose how to face it."],
       enfoque: {
         gramatica: ["Future with will and going to", "Past simple"],

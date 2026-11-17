@@ -517,6 +517,15 @@ mark.hit { background: var(--gold); color: #1f1b2e; border-radius: 4px; padding:
 .tv-hint { font-size: .82rem; opacity: .72; }
 .vw-demo { font-weight: 700; text-decoration: underline wavy; text-underline-offset: 3px; }
 
+/* the transcript follows the video */
+.tv .timed { cursor: pointer; border-radius: 10px; padding: .12em .55em; margin-left: -.55em; margin-right: -.2em; transition: background .35s, opacity .35s, color .35s, box-shadow .35s; }
+.tv .timed:hover { background: color-mix(in srgb, var(--accent) 12%, transparent); }
+.tv.syncing .timed { opacity: .55; }
+.tv.syncing .timed.past { opacity: .78; }
+.tv.syncing .timed.now { opacity: 1; background: color-mix(in srgb, var(--accent) 20%, transparent); box-shadow: inset 4px 0 0 var(--accent); }
+.tv.song.syncing .tv-line.now { font-weight: 700; font-size: 1.12em; }
+.tv.syncing .tv-call.timed.now { box-shadow: none; }
+
 /* after: practice list */
 .plist { display: grid; gap: 8px; }
 .pl { position: relative; display: grid; grid-template-columns: 38px 1fr; gap: 12px; align-items: center; padding: 9px 46px 9px 9px; border-radius: 14px; text-decoration: none; color: inherit; font-weight: 700; line-height: 1.25; background: color-mix(in srgb, var(--ink2) 7%, transparent); border: 1px solid color-mix(in srgb, var(--ink2) 12%, transparent); transition: transform .25s var(--ease), background .25s; }
