@@ -63,7 +63,7 @@
     [/docs\.google/, "Google Docs"], [/vimeo/, "Vimeo"], [/canva/, "Canva"], [/wordwall/, "Wordwall"], [/genial\.?ly/, "Genially"],
     [/learningapps/, "LearningApps"], [/educaplay/, "Educaplay"], [/liveworksheets/, "Liveworksheets"], [/padlet/, "Padlet"],
     [/vocaroo/, "Vocaroo"], [/spotify/, "Spotify"], [/edpuzzle/, "Edpuzzle"], [/wayground/, "Wayground"], [/quizizz/, "Quizizz"], [/gridgenius/, "Grid Genius"], [/kahoot/, "Kahoot!"],
-    [/h5p/, "H5P"], [/soundcloud/, "SoundCloud"], [/flip\.com/, "Flip"], [/lastfiveminutes\.github\.io/, "The Last Five Minutes game"]];
+    [/h5p/, "H5P"], [/soundcloud/, "SoundCloud"], [/flip\.com/, "Flip"], [/lastfiveminutes\.github\.io/, "Web game"]];
   function platform(u) {
     if (u.charAt(0) === "#") return "On this page";
     var x;
@@ -96,7 +96,7 @@
   function bgCrop(a) {
     var src = a.imagen || "";
     if (!src) return "background:var(--s)";
-    return "background-image:url('" + esc(src) + "');background-position:" + esc(a.foco || "50% 50%") + ";background-size:" + esc(a.zoom || "cover");
+    return "background-image:url('" + esc(src) + "');background-position:" + esc(a.foco || "50% 25%") + ";background-size:" + esc(a.zoom || "cover");
   }
 
   /* ================= data shape ================= */
@@ -180,8 +180,8 @@
       esc(t.titulo || "Meet the Teachers") + '</h2></div><div class="team">' +
       people.map(function (p, i) {
         var bio = arr(p.bio), c = TEAM_COLORS[i % TEAM_COLORS.length], foto = String(p.foto || "");
-        return '<article class="polaroid" data-pop><div class="ph-frame" style="--c1:' + c[0] + ";--c2:" + c[1] + '">' +
-          (foto ? '<img src="' + esc(foto) + '" alt="' + esc(p.nombre) + '">' : "<span>" + esc(initials(p.nombre)) + "</span>") + "</div>" +
+        return '<article class="polaroid" data-pop><div class="ph-frame' + (foto ? " has-photo" : "") + '" style="--c1:' + c[0] + ";--c2:" + c[1] + '">' +
+          (foto ? '<img src="' + esc(foto) + '" alt="' + esc(p.nombre) + '" loading="lazy" decoding="async">' : "<span>" + esc(initials(p.nombre)) + "</span>") + "</div>" +
           "<h3>" + esc(p.nombre) + "</h3>" + (p.rol ? '<p class="role">' + esc(p.rol) + "</p>" : "") +
           (bio[0] ? '<p class="bio">' + esc(bio[0]) + "</p>" : "") +
           (bio.length > 1 ? '<details class="more"><summary>Read more</summary>' + bio.slice(1).map(function (x) { return '<p class="bio">' + esc(x) + "</p>"; }).join("") + "</details>" : "") +
@@ -290,7 +290,8 @@
   function activity(h, a, j) {
     var sk = skillOf(a.habilidad), url = cleanUrl(a.link), internal = url.charAt(0) === "#";
     return '<div class="act s-' + sk.cls + (done[a.id] ? " is-done" : "") + '" id="act-' + esc(a.id) + '" data-act="' + esc(a.id) + '">' +
-      '<div class="act-media"><div class="im" style="' + bgCrop(a) + '"></div><span class="pill">' + icon(sk.cls) + esc(sk.label) + '</span><span class="act-num">' + pad(j + 1) + "</span>" +
+      '<div class="act-media"><div class="im' + (h.fondo ? "" : " raw") + '" style="background-image:url(\'' + esc(h.fondo || h.portada) + '\')"></div>' +
+      (a.imagen ? '<span class="pic"><img src="' + esc(a.imagen) + '" alt="" loading="lazy" decoding="async"></span>' : "") + '<span class="pill">' + icon(sk.cls) + esc(sk.label) + '</span><span class="act-num">' + pad(j + 1) + "</span>" +
       (url ? '<span class="host">' + (internal ? "↓ " : "") + esc(platform(url)) + "</span>" : "") +
       '<span class="stamp" aria-hidden="true"><span><b>✓</b>DONE</span></span></div>' +
       '<div class="act-body">' + (a.titulo ? "<h4>" + esc(a.titulo) + "</h4>" : "") + (a.instrucciones ? "<p>" + esc(a.instrucciones) + "</p>" : "") +

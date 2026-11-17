@@ -2,8 +2,8 @@
    CONTENIDO DE LA PÁGINA — edita aquí los textos, enlaces e imágenes.
    (No hace falta tocar el resto del código.)
    - Las imágenes van en la carpeta img/ y se nombran con su ruta.
-   - "foco" y "zoom" eligen qué parte de la imagen se ve en cada tarjeta
-     de actividad: foco = "x% y%", zoom = "cover" o un tamaño como "220%".
+   - La "imagen" de cada actividad se ve COMPLETA (sin recortes) sobre el
+     fondo de su historia; una captura de la actividad queda muy bien.
    - "tema" son los colores del mundo de cada historia.
    ===================================================================== */
 window.SITE = {
@@ -28,11 +28,17 @@ window.SITE = {
   equipo: {
     titulo: "Meet the Teachers",
     personas: [
-      { nombre: "Teacher Name", rol: "Trainee teacher", foto: "", bio: [
-        "Write a short introduction here: who you are, what you study and why you love teaching.",
-        "Add a second paragraph about why stories matter for learning English."] },
-      { nombre: "Teacher Name", rol: "Trainee teacher", foto: "", bio: ["Write a short introduction here."] },
-      { nombre: "Teacher Name", rol: "Trainee teacher", foto: "", bio: ["Write a short introduction here."] }
+      { nombre: "Laura Monroy", rol: "Spanish and Foreign Languages student · Universidad Santo Tomás", foto: "img/team-laura-monroy.webp", bio: [
+        "My name is Laura Monroy, and I am a student of Spanish and Foreign Languages (English and French) at Universidad Santo Tomás. I am passionate about languages, education, and cultural exchange. I enjoy learning new languages, discovering different cultures, and exploring how communication can bring people together.",
+        "I am particularly interested in teaching, creativity, and designing meaningful educational experiences that help children develop their language skills in an engaging and dynamic way. Through my academic journey and personal experiences, I hope to become a dedicated language teacher who inspires students, encourages their learning, and makes a positive contribution to education and society."] },
+      { nombre: "Laura Camila Pita", rol: "Spanish and Foreign Languages student", foto: "img/team-laura-camila-pita.webp", bio: [
+        "Hello! My name is Laura Camila Pita, and I am a Spanish and Foreign Languages student. I have always been curious about languages and different cultures. I consider myself an open-minded and creative person who enjoys meeting people, discovering new places, and stepping outside my comfort zone. My experiences abroad have strengthened my interest in intercultural communication and taught me to appreciate different perspectives and build connections beyond language.",
+        "These experiences have strengthened my passion for teaching and my belief that learning a language should also open doors to understanding the world. I enjoy exploring creative ways to bring real-life experiences and cultural diversity into the classroom, especially when working with children. I believe that teachers can inspire students to become curious, confident, and open to new perspectives.",
+        "I see storytelling as a meaningful part of this process because stories allow children to explore different worlds, connect with characters, and understand realities beyond their own. They stimulate imagination, encourage empathy, and make language learning more engaging. For me, stories are not just a way to learn a language, but also a way to help children discover the world and their place in it."] },
+      { nombre: "Nicoll Piratova Soler", rol: "Languages student (English and French) · Universidad Santo Tomás", foto: "img/team-nicoll-piratova.webp", bio: [
+        "My name is Nicoll Piratova Soler. I am a Languages student at Universidad Santo Tomás, and I am studying English and French. I have always been curious about languages and different cultures. My interest in languages started because I realized that a language is not only words and grammar. It is a way to understand how other people think, feel, and see the world.",
+        "These experiences have strengthened my passion for teaching and my belief that learning a language should also open doors to understanding the world. I enjoy exploring creative ways to bring real-life experiences and cultural diversity into the classroom, especially when working with children. I believe that teachers can inspire students to become curious, confident, and open to new perspectives.",
+        "I see storytelling as a meaningful part of this process because stories allow children to explore different worlds; they stimulate imagination, encourage empathy, and make language learning more engaging."] }
     ]
   },
   objetivos: {
@@ -71,17 +77,14 @@ window.SITE = {
         { palabra: "Lonely", significado: "Sad because you are alone." }
       ],
       actividades: [
-        { id: "my-little-world-1", habilidad: "reading", titulo: "Match the routines", instrucciones: "Match each picture with the correct daily routine.",
-          link: "https://wordwall.net/es/resource/123880278?wwmethod=link", boton: "Open Wordwall",
-          imagen: "img/cover-find-my-self.webp", foco: "14% 22%", zoom: "260%" },
-        { id: "my-little-world-2", habilidad: "writing", titulo: "Song crossword", instrucciones: "Use the song and the clues to complete the crossword. Check your spelling!",
-          link: "https://canva.link/royje9celaritqi", boton: "Open Canva",
-          imagen: "img/cover-find-my-self.webp", foco: "88% 38%", zoom: "260%" },
-        { id: "my-little-world-3", habilidad: "grammar", titulo: "Grammar quiz", instrucciones: "Choose the correct option to complete each sentence.",
-          link: "", boton: "", imagen: "img/cover-find-my-self.webp", foco: "6% 88%", zoom: "300%" },
-        { id: "my-little-world-4", habilidad: "speaking", titulo: "My favorite song", instrucciones: "Create a slide about your favorite song, then record a short video talking about it.",
-          link: "https://canva.link/md2tc7sr1cxfhfg", boton: "Open Canva",
-          imagen: "img/cover-find-my-self.webp", foco: "48% 62%", zoom: "230%" }
+        { id: "fms-listening", habilidad: "listening", titulo: "Song word search", instrucciones: "Listen to the song Finding Myself, spot the verbs in the past simple and find them in the word search.",
+          link: "https://canva.link/md2tc7sr1cxfhfg", boton: "Open Canva", imagen: "img/act-fms-listening.webp" },
+        { id: "fms-writing", habilidad: "writing", titulo: "Complete the lyrics", instrucciones: "Read each line of the song and drag the missing word into the gap.",
+          link: "https://wordwall.net/es/resource/123880278?wwmethod=link", boton: "Open Wordwall", imagen: "img/act-fms-writing.webp" },
+        { id: "fms-reading", habilidad: "reading", titulo: "Reading and comprehension maze", instrucciones: "Read the clues about the song, make inferences and find your way out of the maze.",
+          link: "https://view.genially.com/6af9f1666050153a5ea3c900", boton: "Open Genially", imagen: "img/act-fms-reading.webp" },
+        { id: "fms-speaking", habilidad: "speaking", titulo: "Jump game", instrucciones: "Jump through the levels of the game and answer each question out loud in English.",
+          link: "https://canva.link/royje9celaritqi", boton: "Open Canva", imagen: "img/act-fms-speaking.webp" }
       ],
       galeria: []
     },
@@ -108,13 +111,13 @@ window.SITE = {
       ],
       actividades: [
         { id: "green-tunja-who", habilidad: "reading", titulo: "Who is who?", instrucciones: "Open the boxes one by one and say who each character from the episode is.",
-          link: "https://wordwall.net/resource/123491145/who-is-who", boton: "Open Wordwall", imagen: "img/act-petals-who.webp", foco: "50% 50%", zoom: "cover" },
+          link: "https://wordwall.net/resource/123491145/who-is-who", boton: "Open Wordwall", imagen: "img/act-petals-who.webp" },
         { id: "green-tunja-order", habilidad: "listening", titulo: "Put the story in order", instrucciones: "Listen to the episode again and choose what happened first, next and last.",
-          link: "https://wordwall.net/resource/123491582/put-the-story-in-order", boton: "Open Wordwall", imagen: "img/cover-behind-the-petals.webp", foco: "18% 52%", zoom: "260%" },
+          link: "https://wordwall.net/resource/123491582/put-the-story-in-order", boton: "Open Wordwall", imagen: "img/act-petals-order.webp" },
         { id: "green-tunja-true-false", habilidad: "listening", titulo: "True or false", instrucciones: "The sentences fly by fast! Decide if each one is true or false before time runs out.",
-          link: "https://wordwall.net/resource/123491787/true-or-false", boton: "Open Wordwall", imagen: "img/cover-behind-the-petals.webp", foco: "82% 50%", zoom: "260%" },
+          link: "https://wordwall.net/resource/123491787/true-or-false", boton: "Open Wordwall", imagen: "img/act-petals-truefalse.webp" },
         { id: "green-tunja-crossword", habilidad: "vocabulary", titulo: "Charlie Charlie crossword", instrucciones: "Read the clues and complete the crossword with words from the episode.",
-          link: "https://share.gridgenius.app/p/behind-the-petals-episode-charlie-charlie-medium-Vxoy2Y", boton: "Open crossword", imagen: "img/act-petals-crossword.webp", foco: "50% 50%", zoom: "cover" }
+          link: "https://share.gridgenius.app/p/behind-the-petals-episode-charlie-charlie-medium-Vxoy2Y", boton: "Open crossword", imagen: "img/act-petals-crossword.webp" }
       ],
       galeria: []
     },
@@ -141,13 +144,13 @@ window.SITE = {
       ],
       actividades: [
         { id: "brave-enough-to-leave-1", habilidad: "reading", titulo: "Escape the House", instrucciones: "Read carefully and complete the reading challenge.",
-          link: "https://lastfiveminutes.github.io/reading/", boton: "Start reading", imagen: "img/tlfm-reading.jpg", foco: "50% 62%", zoom: "cover" },
+          link: "https://lastfiveminutes.github.io/reading/", boton: "Start reading", imagen: "img/tlfm-reading.jpg" },
         { id: "brave-enough-to-leave-2", habilidad: "writing", titulo: "Daniela's Diary", instrucciones: "Complete the writing activity based on the short film.",
-          link: "https://lastfiveminutes.github.io/writing/", boton: "Start writing", imagen: "img/tlfm-writing.jpg", foco: "50% 60%", zoom: "cover" },
+          link: "https://lastfiveminutes.github.io/writing/", boton: "Start writing", imagen: "img/tlfm-writing.jpg" },
         { id: "brave-enough-to-leave-3", habilidad: "listening", titulo: "Detectives on the Call", instrucciones: "Listen carefully and answer the questions.",
-          link: "https://lastfiveminutes.github.io/listening/", boton: "Start listening", imagen: "img/tlfm-listening.jpg", foco: "50% 60%", zoom: "cover" },
+          link: "https://lastfiveminutes.github.io/listening/", boton: "Start listening", imagen: "img/tlfm-listening.jpg" },
         { id: "brave-enough-to-leave-4", habilidad: "speaking", titulo: "Rewind Speaking Show", instrucciones: "It's your turn to speak! Follow the steps and record your answer.",
-          link: "https://lastfiveminutes.github.io/speaking/", boton: "Start speaking", imagen: "img/tlfm-speaking.jpg", foco: "50% 60%", zoom: "cover" }
+          link: "https://lastfiveminutes.github.io/speaking/", boton: "Start speaking", imagen: "img/tlfm-speaking.jpg" }
       ],
       galeria: []
     },
@@ -175,15 +178,13 @@ window.SITE = {
       ],
       actividades: [
         { id: "lila-reading", habilidad: "reading", titulo: "Reading quiz", instrucciones: "Read each question about Lila's story and choose the correct answer. Type your name to start.",
-          link: "https://wayground.com/join?gc=65595347&source=liveDashboard", boton: "Open Wayground", imagen: "img/cover-lila.webp", foco: "20% 72%", zoom: "300%" },
+          link: "https://wayground.com/join?gc=65595347&source=liveDashboard", boton: "Open Wayground", imagen: "img/cover-lila.webp" },
         { id: "lila-listening", habilidad: "listening", titulo: "What happened in the meadow?", instrucciones: "Watch the illustrated video of Lila and complete the listening activities.",
-          link: "https://canva.link/fd7fe9z641rosgv", boton: "Open Canva", imagen: "img/act-lila-listening.webp", foco: "50% 0%", zoom: "cover" },
+          link: "https://canva.link/fd7fe9z641rosgv", boton: "Open Canva", imagen: "img/act-lila-listening.webp" },
         { id: "lila-writing", habilidad: "writing", titulo: "The story behind the flowers", instrucciones: "Practice the past simple, adjectives and connectors with the events and characters of the story.",
-          link: "https://canva.link/qpbhzuqghe436xt", boton: "Open Canva", imagen: "img/act-lila-writing.webp", foco: "50% 0%", zoom: "cover" },
+          link: "https://canva.link/qpbhzuqghe436xt", boton: "Open Canva", imagen: "img/act-lila-writing.webp" },
         { id: "lila-speaking", habilidad: "speaking", titulo: "Speaking challenge", instrucciones: "Play the board game in groups of four: roll, move and answer each question in English.",
-          link: "https://view.genially.com/6af7ea0649f94c0169784faa", boton: "Open Genially", imagen: "img/act-lila-speaking.webp", foco: "50% 50%", zoom: "cover" },
-        { id: "the-whispering-wind-chime-3", habilidad: "vocabulary", titulo: "Magic flashcards", instrucciones: "Read the meanings and flip the cards to discover the secret words.",
-          link: "#vocabulary", boton: "Play here", imagen: "img/cover-lila.webp", foco: "72% 74%", zoom: "300%" }
+          link: "https://view.genially.com/6af7ea0649f94c0169784faa", boton: "Open Genially", imagen: "img/act-lila-speaking.webp" },
       ],
       galeria: []
     }
