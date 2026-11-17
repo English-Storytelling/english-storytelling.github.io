@@ -659,7 +659,46 @@ html.no-tts .say, html.no-tts .kw-top svg { display: none; }
 .chapter.light .tv.karaoke.syncing .timed.now .w.cur { color: color-mix(in srgb, var(--accent) 85%, #000); text-shadow: none; }
 .tv.karaoke .w { border-radius: 4px; }
 .tv.karaoke.syncing .timed.now .w.cur { background: color-mix(in srgb, var(--accent) 18%, transparent); box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 18%, transparent); }
-.tv.song.karaoke.syncing .tv-line.now { font-size: 1.12em; font-weight: 700; }
+
+/* map of the parts (song / story / film) that follows the video */
+.tv-map { display: flex; gap: 3px; height: 40px; flex: none; }
+.seg { position: relative; flex-basis: 0; min-width: 30px; overflow: hidden; border: 0; border-radius: 10px; padding: 0 6px; cursor: pointer; font: inherit; font-size: .74rem; font-weight: 700; color: inherit; background: color-mix(in srgb, var(--ink2) 10%, transparent); transition: box-shadow .25s, background .25s; }
+.seg span { position: relative; z-index: 1; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.seg .fill { position: absolute; inset: 0; z-index: 0; background: var(--accent); opacity: .45; transform: scaleX(var(--f, 0)); transform-origin: 0 50%; transition: transform .25s linear; }
+.seg.pre { background: color-mix(in srgb, var(--accent2) 24%, transparent); }
+.seg.cho { background: color-mix(in srgb, var(--accent) 24%, transparent); }
+.seg:hover { box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--accent) 60%, transparent); }
+.seg.on { box-shadow: inset 0 0 0 2px var(--accent); }
+.seg.done .fill { opacity: .22; }
+.seg:first-child { border-radius: 12px 6px 6px 12px; }
+.seg:last-child { border-radius: 6px 12px 12px 6px; }
+
+/* parts as small labels, no boxes */
+.tv.has-time .tv-sec + .tv-sec { margin-top: 26px; }
+.tv.has-time .tv-sec h5 { display: inline-block; padding: .3em .8em; border-radius: 999px; margin-bottom: 10px; background: color-mix(in srgb, var(--ink2) 10%, transparent); color: inherit; }
+.tv.has-time .tv-sec.pre h5 { background: color-mix(in srgb, var(--accent2) 30%, transparent); }
+.tv.has-time .tv-sec.chorus h5 { background: var(--accent); color: var(--accent-ink); }
+.tv.song.has-time .tv-sec.chorus { padding: 0; background: none; border: 0; border-radius: 0; }
+.tv.song.has-time .chorus .tv-line { font-weight: inherit; }
+
+/* the line being sung: big and centred; the rest steps back */
+.tv.song.syncing .tv-line { opacity: .38; transition: opacity .35s, font-size .35s; }
+.tv.song.syncing .tv-line.past { opacity: .55; }
+.tv.song.syncing .tv-line.next { opacity: .78; }
+.tv.song.syncing .tv-line.now { opacity: 1; font-size: 1.36em; font-weight: 700; line-height: 1.32; margin: 6px 0 10px; }
+.tv.song.karaoke.syncing .tv-line.now { font-size: 1.36em; }
+.tv.syncing .tv-body { -webkit-mask-image: linear-gradient(transparent, #000 10%, #000 88%, transparent); mask-image: linear-gradient(transparent, #000 10%, #000 88%, transparent); }
+.tv.syncing .tv-hint { display: none; }
+
+/* golden glitter on the word being sung / read */
+.tv { position: relative; }
+.tv-fx { position: absolute; inset: 0; pointer-events: none; overflow: hidden; z-index: 2; }
+.spk { position: absolute; left: 0; top: 0; margin: -2px 0 0 -2px; border-radius: 50%; opacity: 0; background: radial-gradient(circle, #fff 0 20%, var(--g) 45%, transparent 72%); box-shadow: 0 0 8px 2px var(--g), 0 0 2px #fff; will-change: transform, opacity; }
+.spk.star { border-radius: 0; background: radial-gradient(circle, #fff 0 12%, var(--g) 30%, transparent 62%); box-shadow: none; clip-path: polygon(50% 0, 58% 42%, 100% 50%, 58% 58%, 50% 100%, 42% 58%, 0 50%, 42% 42%); filter: drop-shadow(0 0 6px var(--g)) drop-shadow(0 0 2px #fff); margin: -8px 0 0 -8px; }
+.tv.karaoke.syncing .timed.now .w.cur { color: transparent; background: linear-gradient(100deg, #f5b942 0%, #ffe08a 35%, #fffbe6 50%, #ffe08a 65%, #f5b942 100%) 0 0 / 220% 100%; -webkit-background-clip: text; background-clip: text; text-shadow: none; box-shadow: none; filter: drop-shadow(0 0 12px rgba(255, 207, 110, .75)); animation: goldsweep .9s linear infinite; }
+.tv.karaoke.syncing .timed.now .w.sung { color: #fff3d6; }
+@keyframes goldsweep { from { background-position: 110% 0; } to { background-position: -110% 0; } }
+@media (prefers-reduced-motion: reduce) { .tv.karaoke.syncing .timed.now .w.cur { animation: none; } }
 
 /* nothing shows before its entrance animation is ready (classes set by app.js) */
 .pre .hero-text, .pre .fan, .pre .top-in { visibility: hidden; }

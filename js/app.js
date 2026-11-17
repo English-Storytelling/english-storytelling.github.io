@@ -328,10 +328,22 @@
     var secs = parseScript(h.transcripcion), V = vocabOf(h), whos = {}, wi = 0;
     if (!secs.length) return '<p class="soon-txt">The ' + scriptLabel(h).toLowerCase() + " will appear here soon.</p>";
     var titled = secs.filter(function (s) { return s.title; }).length;
-    var nav = titled > 1 ? '<nav class="tv-nav" aria-label="Parts">' + secs.map(function (s, i) { return s.title ? '<button type="button" data-go="' + i + '">' + esc(s.title) + "</button>" : ""; }).join("") + "</nav>" : "";
+    var seen = {}, ORD = ["", "", " · 2nd time", " · 3rd time", " · 4th time"];
+    secs.forEach(function (s) { if (!s.title) return; var key = s.title.toLowerCase(); seen[key] = (seen[key] || 0) + 1; s.nth = seen[key]; });
+    secs.forEach(function (s) { if (s.title) s.label = s.title + (seen[s.title.toLowerCase()] > 1 && s.nth > 1 ? ORD[s.nth] || " · again" : ""); });
+    var starts = secs.map(function (s) { var x = s.items.filter(function (it) { return it.at != null; })[0]; return x ? x.at : null; });
+    var timedMap = titled > 1 && starts.every(function (t, i) { return t != null || !secs[i].title; });
+    var lastT = Math.max.apply(null, starts.filter(function (t) { return t != null; }).concat([0]));
+    function short(t) { return t.replace(/^verse\s*/i, "V").replace(/^pre-?chorus$/i, "Pre").replace(/^final chorus$/i, "Final").replace(/^scene\s*(\d+).*/i, "S$1").replace(/^opening scene.*/i, "Opening").replace(/^the final message$/i, "End").replace(/^rising action$/i, "Rising").replace(/^falling action$/i, "Falling"); }
+    if (timedMap) var map = '<div class="tv-map" role="group" aria-label="Parts: tap one to go there">' + secs.map(function (s, i) {
+      if (!s.title) return "";
+      var nx = starts.slice(i + 1).filter(function (t) { return t != null; })[0], d = Math.max(3, (nx != null ? nx : lastT + 15) - starts[i]);
+      return '<button type="button" class="seg' + (/chorus/i.test(s.title) && !/pre/i.test(s.title) ? " cho" : /pre/i.test(s.title) ? " pre" : "") + '" data-seg="' + i + '" data-t="' + starts[i] + '" style="flex-grow:' + Math.round(d) + '" title="' + esc(s.label) + " · " + clock(starts[i]) + '"><span>' + esc(short(s.title)) + '</span><i class="fill"></i></button>';
+    }).join("") + "</div>";
+    var nav = timedMap ? map : titled > 1 ? '<nav class="tv-nav" aria-label="Parts">' + secs.map(function (s, i) { return s.title ? '<button type="button" data-go="' + i + '">' + esc(s.title) + "</button>" : ""; }).join("") + "</nav>" : "";
     function tx(t) { return '<span class="tx" data-raw="' + esc(t) + '">' + fmt(t, V) + "</span>"; }
     var body = secs.map(function (s, i) {
-      return '<section class="tv-sec' + (/chorus/i.test(s.title) ? " chorus" : "") + '" data-sec="' + i + '">' + (s.title ? "<h5>" + esc(s.title) + "</h5>" : "") +
+      return '<section class="tv-sec' + (/chorus/i.test(s.title) ? (/pre/i.test(s.title) ? " pre" : " chorus") : "") + '" data-sec="' + i + '">' + (s.title ? "<h5>" + esc(s.label || s.title) + "</h5>" : "") +
         s.items.map(function (it) {
           var ta = it.at != null ? ' data-t="' + it.at + '" title="Jump to ' + clock(it.at) + '"' : "", tc = it.at != null ? " timed" : "";
           if (it.k === "say") {
@@ -807,7 +819,12 @@
     karaoke(tv);
     loadYT(function () {
       if (!document.contains(iframe)) return;
-      var pl = new window.YT.Player(iframe, { events: { onReady: function () { tv._player = pl; } } });
+      var pl = new window.YT.Player(iframe, { events: { onReady: function () {
+        tv._player = pl;
+        // the last part lasts until the end of the video
+        var d = pl.getDuration && pl.getDuration(), segs = $$(".tv-map .seg", tv);
+        if (d && segs.length) { tv._dur = d; var lst = segs[segs.length - 1]; lst.style.flexGrow = Math.max(3, Math.round(d - +lst.getAttribute("data-t"))); }
+      } } });
       var last = -1, iv = setInterval(function () {
         if (!document.contains(iframe)) { clearInterval(iv); tv.classList.remove("syncing"); tv._player = null; return; }
         if (!pl.getCurrentTime) return;
@@ -839,7 +856,48 @@
     tv.classList.add("karaoke");
     tv._lines.forEach(function (x, i) { x.wt = T[i]; var tx = $(".tx", x.el); if (x.wt && tx && !tx._words) wrapWords(tx); });
   }
+
+  /* golden glitter: the word being sung / read leaves a trail of sparkles */
+  var SPARK_N = reduce ? 0 : LITE ? 4 : 10, GOLD = ["#fff4c2", "#ffe08a", "#ffcf6e", "#f5b942", "#ffffff"];
+  function sparkle(tv, word, n) {
+    if (!SPARK_N || !word || !word.animate) return;
+    var fx = tv._fx;
+    if (!fx) { fx = tv._fx = document.createElement("div"); fx.className = "tv-fx"; fx.setAttribute("aria-hidden", "true"); tv.appendChild(fx); tv._pool = []; tv._pi = 0; }
+    var r = word.getBoundingClientRect(), b = tv.getBoundingClientRect(), body = $(".tv-body", tv).getBoundingClientRect();
+    if (r.bottom < body.top || r.top > body.bottom) return;
+    for (var i = 0; i < (n || SPARK_N); i++) {
+      var el = tv._pool[tv._pi];
+      if (!el) { el = document.createElement("i"); fx.appendChild(el); tv._pool[tv._pi] = el; }
+      tv._pi = (tv._pi + 1) % (LITE ? 40 : 110);
+      var star = Math.random() < .3, size = star ? 10 + Math.random() * 12 : 2.5 + Math.random() * 4.5;
+      el.className = star ? "spk star" : "spk";
+      el.style.width = el.style.height = size + "px";
+      el.style.setProperty("--g", GOLD[(Math.random() * GOLD.length) | 0]);
+      var x = r.left - b.left - 4 + Math.random() * (r.width + 8), y = r.top - b.top + r.height * (Math.random() < .62 ? .82 + Math.random() * .35 : -.12 + Math.random() * .2);
+      var dx = (Math.random() - .25) * 46, dy = (Math.random() - .6) * 40;
+      el.animate([
+        { transform: "translate(" + x + "px," + y + "px) scale(.2) rotate(0deg)", opacity: 0 },
+        { transform: "translate(" + (x + dx * .3) + "px," + (y + dy * .3) + "px) scale(1) rotate(45deg)", opacity: 1, offset: .2 },
+        { transform: "translate(" + (x + dx) + "px," + (y + dy) + "px) scale(.1) rotate(120deg)", opacity: 0 }
+      ], { duration: 900 + Math.random() * 1300, easing: "cubic-bezier(.2,.7,.3,1)", fill: "forwards" });
+    }
+  }
+
+  // the map: parts already played, the part playing now (filling up) and the ones to come
+  function mapFollow(tv, now) {
+    var segs = tv._segs || (tv._segs = $$(".tv-map .seg", tv));
+    if (!segs.length) return;
+    var dur = tv._dur || 0;
+    segs.forEach(function (sg, i) {
+      var a = +sg.getAttribute("data-t"), b = i + 1 < segs.length ? +segs[i + 1].getAttribute("data-t") : (dur || a + 15);
+      var on = now >= a && now < b, past = now >= b;
+      sg.classList.toggle("on", on); sg.classList.toggle("done", past);
+      var f = past ? 1 : on ? (now - a) / Math.max(.1, b - a) : 0;
+      sg.style.setProperty("--f", f.toFixed(3));
+    });
+  }
   function follow(tv, now) {
+    mapFollow(tv, now);
     var L = tv._lines, k = -1;
     for (var i = 0; i < L.length; i++) if (L[i].t <= now + .15) k = i;
     if (!tv.classList.contains("syncing")) tv.classList.add("syncing");
@@ -847,24 +905,36 @@
     var cur = k >= 0 && L[k].wt, tx = cur && $(".tx", L[k].el);
     if (tx && tx._words) {
       var wi = -1; for (var j = 0; j < cur.length; j++) if (cur[j] <= now + .08) wi = j;
-      if (wi !== tv._wi || k !== tv._k) { tv._wi = wi; tx._words.forEach(function (sp) { var d = +sp.getAttribute("data-i"); sp.classList.toggle("sung", d < wi); sp.classList.toggle("cur", d === wi); }); }
+      var playing = tv._player && tv._player.getPlayerState && tv._player.getPlayerState() === 1;
+      if (wi !== tv._wi || k !== tv._k) {
+        tv._wi = wi;
+        tx._words.forEach(function (sp) { var d = +sp.getAttribute("data-i"); sp.classList.toggle("sung", d < wi); sp.classList.toggle("cur", d === wi); });
+        if (playing && wi >= 0) sparkle(tv, $('.w.cur', tx));
+      } else if (playing && wi >= 0) sparkle(tv, $('.w.cur', tx), Math.ceil(SPARK_N / 2));
     }
     if (k === tv._k) return;
     if (tv._k >= 0 && L[tv._k]) { var old = $(".tx", L[tv._k].el); if (old && old._words) old._words.forEach(function (sp) { sp.classList.remove("cur"); sp.classList.add("sung"); }); }
     tv._k = k; tv._wi = -2;
-    L.forEach(function (x, i) { x.el.classList.toggle("now", i === k); x.el.classList.toggle("past", i < k); });
+    L.forEach(function (x, i) { x.el.classList.toggle("now", i === k); x.el.classList.toggle("past", i < k); x.el.classList.toggle("next", i === k + 1); });
     // keep the line in view, unless the reader is scrolling on their own
     if (k >= 0 && (!tv._hand || Date.now() - tv._hand > 4000)) {
       var body = $(".tv-body", tv), el = L[k].el;
-      body.scrollTo({ top: el.getBoundingClientRect().top - body.getBoundingClientRect().top + body.scrollTop - body.clientHeight * .3, behavior: reduce ? "auto" : "smooth" });
+      var er = el.getBoundingClientRect();
+      body.scrollTo({ top: er.top - body.getBoundingClientRect().top + body.scrollTop - Math.max(8, body.clientHeight * .42 - er.height / 2), behavior: reduce ? "auto" : "smooth" });
     }
   }
   // tap a line: the video jumps there (and starts, if it was not playing yet)
   document.addEventListener("click", function (e) {
-    var ln = e.target.closest && e.target.closest(".timed");
+    var ln = e.target.closest && e.target.closest(".timed, .seg");
     if (!ln || e.target.closest(".vw")) return;
     var tv = ln.closest(".tv"), t = +ln.getAttribute("data-t");
-    if (tv._player && tv._player.seekTo) { tv._player.seekTo(t, true); if (tv._player.playVideo) tv._player.playVideo(); tv._hand = 0; follow(tv, t); return; }
+    if (ln.classList.contains("seg")) { var sc = $('[data-sec="' + ln.getAttribute("data-seg") + '"]', tv); if (sc) { tv._instant = false; scrollBody(tv, sc); } }
+    if (tv._player && tv._player.seekTo) {
+      var pl = tv._player; pl.seekTo(t, true); if (pl.playVideo) pl.playVideo(); tv._hand = 0; follow(tv, t);
+      // if the player was still busy with the last jump, try once more
+      setTimeout(function () { if (pl.getCurrentTime && Math.abs(pl.getCurrentTime() - t) > 3) pl.seekTo(t, true); }, 900);
+      return;
+    }
     var ch = tv.closest(".chapter"), btn = ch && $(".stage [data-yt]", ch);
     if (btn) { btn._start = t; playVideo(btn); }
   });
