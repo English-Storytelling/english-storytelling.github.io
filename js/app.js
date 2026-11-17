@@ -122,6 +122,22 @@
   var PKEY = "es-progress-v1", done = {};
   try { done = JSON.parse(localStorage.getItem(PKEY) || "{}") || {}; } catch (e) { done = {}; }
   function saveDone() { try { localStorage.setItem(PKEY, JSON.stringify(done)); } catch (e) {} }
+  var WKEY = "es-words-v1", known = {};
+  try { known = JSON.parse(localStorage.getItem(WKEY) || "{}") || {}; } catch (e) { known = {}; }
+  function wkey(h, v) { return h.id + ":" + slug(v.palabra); }
+
+  // say a word out loud (the browser's own English voice)
+  var TTS = !!(window.speechSynthesis && window.SpeechSynthesisUtterance), VOICE = null;
+  if (!TTS) document.documentElement.classList.add("no-tts");
+  function speak(w) {
+    if (!TTS || !w) return;
+    try {
+      var ss = window.speechSynthesis; ss.cancel();
+      if (!VOICE) { var vs = ss.getVoices(); VOICE = vs.filter(function (v) { return /^en[-_]US/i.test(v.lang); })[0] || vs.filter(function (v) { return /^en/i.test(v.lang); })[0] || null; }
+      var u = new window.SpeechSynthesisUtterance(w); u.lang = "en-US"; u.rate = .85; if (VOICE) u.voice = VOICE;
+      ss.speak(u);
+    } catch (e) {}
+  }
 
   /* ================= rendering ================= */
   function hero() {
@@ -226,11 +242,23 @@
     return '<div class="focus"><h4>' + title + '</h4><div class="chips">' + list.map(function (x) { return '<span class="chip' + (alt ? " alt" : "") + '">' + esc(x) + "</span>"; }).join("") + "</div></div>";
   }
 
-  function flash(v, h, small) {
-    return '<button type="button" class="flash' + (small ? " small" : "") + '" data-fg="vocab" data-fv="' + h.id + '" style="--c:' + esc(cardColor(h)) + '" aria-pressed="false" aria-label="' + esc(v.palabra) + ': flip the card">' +
-      '<span class="flash-in"><span class="face front">' + (small ? "" : '<img class="thumb" src="' + esc(thumb(h)) + '" alt="" loading="lazy" decoding="async">') +
-      "<strong>" + esc(v.palabra) + "</strong><small>↻ Tap to flip</small></span>" +
-      '<span class="face back"><i class="bim" style="background-image:url(\'' + esc(thumb(h)) + '\')"></i><span>' + esc(v.significado) + "</span>" + (small ? "" : "<small>" + esc(h.titulo) + "</small>") + "</span></span></button>";
+  var SAY = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9.5v5h3.5L12 18V6L7.5 9.5H4Z" fill="currentColor" fill-opacity=".25"/><path d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11"/></svg>';
+  function formsOf(v) { return [v.palabra].concat(arr(v.formas)).filter(Boolean); }
+  // the example sentence with the word in bold, and the form of the word it uses
+  function example(v) {
+    var e = String(v.ejemplo || ""), m = e.match(new RegExp("\\b(" + formsOf(v).map(rx).join("|") + ")\\b", "i"));
+    return { html: esc(e).replace(new RegExp("\\b(" + formsOf(v).map(function (f) { return rx(esc(f)); }).join("|") + ")\\b", "i"), "<b>$1</b>"), form: m ? m[1] : v.palabra };
+  }
+  function flash(v, h) {
+    var k = wkey(h, v), kn = !!known[k], ex = example(v);
+    return '<div class="flash' + (kn ? " known" : "") + '" role="button" tabindex="0" data-fg="vocab" data-fv="' + h.id + '" data-wk="' + esc(k) + '" style="--c:' + esc(cardColor(h)) + '" aria-pressed="false" aria-label="' + esc(v.palabra) + ': flip the card">' +
+      '<span class="flash-in"><span class="face front"><img class="thumb" src="' + esc(thumb(h)) + '" alt="" loading="lazy" decoding="async">' +
+      (v.tipo ? '<span class="kw-type">' + esc(v.tipo) + "</span>" : "") + "<strong>" + esc(v.palabra) + '</strong><small>↻ Tap to flip</small><span class="known-badge" aria-hidden="true">✓ I know it</span></span>' +
+      '<span class="face back"><i class="bim" style="background-image:url(\'' + esc(thumb(h)) + '\')"></i><span class="mean">' + esc(v.significado) + "</span>" +
+      (v.ejemplo ? '<span class="ex">“' + ex.html + "”</span>" : "") +
+      '<span class="back-act"><button type="button" class="know" data-know="' + esc(k) + '" aria-pressed="' + kn + '">' + (kn ? "✓ I know it" : "I know it!") + "</button>" +
+      '<button type="button" class="find" data-find="' + h.id + '" data-word="' + esc(ex.form) + '">In the story ↗</button></span><small class="from">' + esc(h.titulo) + "</small></span></span>" +
+      '<button type="button" class="say" data-say="' + esc(v.palabra) + '" aria-label="Listen: ' + esc(v.palabra) + '">' + SAY + "</button></div>";
   }
 
   var FX = { song: "note", podcast: "petal", film: "dust", fairy: "dot" };
@@ -280,8 +308,10 @@
   function vocabOf(h) {
     if (h._V !== undefined) return h._V;
     var w = h.vocabulario.filter(function (v) { return v && v.palabra; }), map = {};
-    w.forEach(function (v) { map[v.palabra.toLowerCase()] = v.significado; });
-    h._V = w.length ? { re: new RegExp("\\b(" + w.map(function (v) { return rx(v.palabra); }).join("|") + ")\\b", "gi"), map: map } : null;
+    var all = [];
+    w.forEach(function (v) { formsOf(v).forEach(function (f) { map[f.toLowerCase()] = v.palabra + " (" + (v.tipo || "word") + "): " + v.significado; all.push(f); }); });
+    all.sort(function (a, b) { return b.length - a.length; });
+    h._V = w.length ? { re: new RegExp("\\b(" + all.map(rx).join("|") + ")\\b", "gi"), map: map } : null;
     return h._V;
   }
   function fmt(t, V, q) {
@@ -327,7 +357,9 @@
     var f = h.enfoque, words = h.vocabulario.filter(function (v) { return v && v.palabra; }), lab = scriptLabel(h);
     var verb = /song|podcast|audio/.test(slug(h.formato)) ? "listen" : "watch";
     var before = '<div class="kit-panel" data-panel="before" role="tabpanel">' + chips("Grammar focus", f.gramatica) + chips("Vocabulary focus", f.vocabulario, true) +
-      (words.length ? '<div class="focus"><h4>Key words · flip them!</h4></div><div class="mini-words">' + words.slice(0, 3).map(function (v) { return flash(v, h, true); }).join("") + "</div>" : "") +
+      (words.length ? '<div class="focus"><h4>Key words · tap to hear them</h4></div><div class="kw-list">' + words.map(function (v) {
+        return '<button type="button" class="kw" aria-expanded="false" data-say="' + esc(v.palabra) + '"><span class="kw-top"><b>' + esc(v.palabra) + "</b>" + (v.tipo ? "<i>" + esc(v.tipo) + "</i>" : "") + SAY + '</span><span class="kw-m">' + esc(v.significado) + "</span></button>";
+      }).join("") + "</div>" : "") +
       '<p class="kit-tip">Look out for ' + (words.length ? "these words" : "new words") + " while you " + verb + "!</p></div>";
     var refl = arr(h.reflexion).filter(Boolean);
     var after = '<div class="kit-panel" data-panel="after" role="tabpanel" hidden>' +
@@ -403,11 +435,15 @@
   function vocab() {
     var withV = D.historias.filter(function (h) { return h.vocabulario.some(function (v) { return v && v.palabra; }); });
     var cards = "";
-    withV.forEach(function (h) { h.vocabulario.forEach(function (v) { if (v && v.palabra) cards += flash(v, h, false); }); });
-    return '<section id="vocabulary" class="band vocab-band"><div class="wrap"><div class="head"><span class="kicker">Flashcards</span><h2 class="title-xl" data-split>Vocabulary</h2>' +
-      "<p data-reveal>Read the word, guess the meaning, then flip the card.</p></div>" +
+    withV.forEach(function (h) { h.vocabulario.forEach(function (v) { if (v && v.palabra) cards += flash(v, h); }); });
+    return '<section id="vocabulary" class="band vocab-band"><div class="wrap"><div class="head"><span class="kicker">Key words</span><h2 class="title-xl" data-split>Vocabulary</h2>' +
+      "<p data-reveal>Every word comes from one of the stories. Listen to it, guess the meaning, flip the card and see it in the story.</p></div>" +
       (cards ? filterBar("vocab", [{ value: "all", label: "All stories" }].concat(withV.map(function (h) { return { value: h.id, label: h.titulo, img: thumb(h) }; }))) +
-        '<div class="cards" id="vocab-cards">' + cards + '</div><p class="vocab-tip">Tip: say each word out loud before you flip it!</p>' : '<p class="soon-txt">Words will appear here soon.</p>') +
+        '<div class="vtop"><div class="vq" id="vq"><div class="vq-top"><span class="vq-k">Word game</span><span class="vq-score" aria-label="Score">★ <b id="vq-score">0</b> <span class="vq-fire">🔥 <b id="vq-streak">0</b></span></span></div>' +
+        '<p class="vq-ask">Which word means…</p><p class="vq-def" id="vq-def" aria-live="polite"></p><div class="vq-opts" id="vq-opts"></div><p class="vq-ex" id="vq-ex" aria-live="polite"></p>' +
+        '<button type="button" class="vq-next" id="vq-next" hidden>Next word →</button></div>' +
+        '<div class="vmeter"><span class="vm-k">Words I know</span><b id="vk-n">0 / 0</b><div class="bar"><span id="vk-bar"></span></div><p>Flip a card and tap <b>I know it!</b> when you are sure. It is saved on this device.</p></div></div>' +
+        '<div class="cards" id="vocab-cards">' + cards + '</div><p class="vocab-tip">Tip: listen, say each word out loud, then flip the card!</p>' : '<p class="soon-txt">Words will appear here soon.</p>') +
       "</div></section>";
   }
 
@@ -553,6 +589,17 @@
 
   document.addEventListener("click", function (e) {
     var t = e.target;
+    var kw = t.closest(".kw");
+    if (kw) { var open = kw.getAttribute("aria-expanded") !== "true"; kw.setAttribute("aria-expanded", open); if (open) speak(kw.getAttribute("data-say")); return; }
+    var sy = t.closest("[data-say]");
+    if (sy) { speak(sy.getAttribute("data-say")); if (ANIM) G.fromTo(sy, { scale: .8 }, { scale: 1, duration: .5, ease: "elastic.out(1,.4)" }); return; }
+    var kn = t.closest("[data-know]");
+    if (kn) { var on = kn.getAttribute("aria-pressed") !== "true"; setKnown(kn.getAttribute("data-know"), on); if (on) burst(kn, false); return; }
+    var fd = t.closest("[data-find]");
+    if (fd) { findInStory(fd.getAttribute("data-find"), fd.getAttribute("data-word")); return; }
+    var vo = t.closest(".vq-o");
+    if (vo) { quizAnswer(vo); return; }
+    if (t.closest("#vq-next")) { quizNext(); return; }
     var db = t.closest("[data-done]");
     if (db) { setDone(db.getAttribute("data-done"), db.getAttribute("aria-pressed") !== "true", db); return; }
     var fl = t.closest(".flash");
@@ -568,10 +615,10 @@
     var thb = t.closest("[data-theater]");
     if (thb) { openTheater(thb.getAttribute("data-theater")); return; }
     var ot = t.closest("[data-open-text]");
-    if (ot) { var kt = $(".kit", ot.closest(".chapter")); setTab(kt, "text"); kt.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "nearest" }); return; }
+    if (ot) { var kt = $(".kit", ot.closest(".chapter")); setTab(kt, "text"); goTo(kt); return; }
     if (t.closest("[data-th-close]") || t.id === "theater") { closeTheater(); return; }
     var vw = t.closest(".vw");
-    if (vw) { vw.focus(); return; }
+    if (vw) { vw.focus(); speak(vw.textContent); return; }
     var y = t.closest("[data-yt]");
     if (y) { playVideo(y); return; }
     var fs = t.closest("[data-filter-story]");
@@ -613,6 +660,7 @@
     revealNow(items);
     var state = ANIM && window.Flip ? window.Flip.getState(items) : null;
     items.forEach(function (el) { el.style.display = value === "all" || el.getAttribute("data-fv") === value ? "" : "none"; if (group === "vocab") el.setAttribute("aria-pressed", "false"); });
+    if (group === "vocab" && $("#vq")) { VQ.pool = value; quizNext(); }
     if (state) {
       window.Flip.from(state, { duration: .55, ease: "power2.inOut", absolute: true, scale: true,
         onEnter: function (els) { return G.fromTo(els, { opacity: 0, scale: .6 }, { opacity: 1, scale: 1, duration: .45 }); },
@@ -621,6 +669,13 @@
     }
   }
 
+  // scroll the page to an element once the scroll animations have been re-measured (a refresh puts the page back where it was)
+  function goTo(el) {
+    setTimeout(function () {
+      var r = el.getBoundingClientRect();
+      window.scrollTo({ top: Math.max(0, r.top + scrollY - Math.max(80, (innerHeight - r.height) / 2)), behavior: reduce ? "auto" : "smooth" });
+    }, ANIM && ST ? 160 : 0);
+  }
   /* story kit tabs */
   function setTab(kitEl, name, focus) {
     $$("[data-tab]", kitEl).forEach(function (b) { var on = b.getAttribute("data-tab") === name; b.setAttribute("aria-selected", on); b.tabIndex = on ? 0 : -1; if (on && focus) b.focus(); });
@@ -644,7 +699,8 @@
   /* transcript reader: find a word, jump to a part, bigger text, follow the part you are reading */
   function scrollBody(tv, el) {
     var body = $(".tv-body", tv);
-    body.scrollTo({ top: el.getBoundingClientRect().top - body.getBoundingClientRect().top + body.scrollTop - 16, behavior: reduce ? "auto" : "smooth" });
+    // instant when the page itself is also scrolling (two smooth scrolls at once cancel each other)
+    body.scrollTo({ top: el.getBoundingClientRect().top - body.getBoundingClientRect().top + body.scrollTop - 16, behavior: reduce || tv._instant ? "auto" : "smooth" });
   }
   document.addEventListener("input", function (e) {
     var inp = e.target;
@@ -768,6 +824,74 @@
     var ch = tv.closest(".chapter"), btn = ch && $(".stage [data-yt]", ch);
     if (btn) { btn._start = t; playVideo(btn); }
   });
+
+
+  /* ---------- key words: words I know, find it in the story, word game ---------- */
+  function setKnown(k, on) {
+    if (on) known[k] = 1; else delete known[k];
+    try { localStorage.setItem(WKEY, JSON.stringify(known)); } catch (e) {}
+    $$('[data-wk="' + k + '"]').forEach(function (el) { el.classList.toggle("known", on); });
+    $$('[data-know="' + k + '"]').forEach(function (b) { b.setAttribute("aria-pressed", on); b.textContent = on ? "✓ I know it" : "I know it!"; });
+    wordsMeter();
+  }
+  function wordsMeter() {
+    var t = 0, d = 0;
+    D.historias.forEach(function (h) { h.vocabulario.forEach(function (v) { if (v && v.palabra) { t++; if (known[wkey(h, v)]) d++; } }); });
+    var n = $("#vk-n"), b = $("#vk-bar");
+    if (n) n.textContent = d + " / " + t;
+    if (b) b.style.transform = "scaleX(" + (t ? d / t : 0) + ")";
+  }
+  function findInStory(id, word) {
+    var ch = $("#story-" + id), kt = ch && $(".kit", ch);
+    if (!kt) return;
+    setTab(kt, "text");
+    var inp = $(".tv-search input", kt);
+    var tv = $(".tv", kt);
+    if (inp) { tv._instant = true; inp.value = word; inp.dispatchEvent(new Event("input", { bubbles: true })); tv._instant = false; }
+    goTo(kt);
+  }
+  var VQ = { pool: "all", cur: null, score: 0, streak: 0, lock: false };
+  function shuffle(a) { a = a.slice(); for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)), x = a[i]; a[i] = a[j]; a[j] = x; } return a; }
+  function wordPool(id) {
+    var out = [];
+    D.historias.forEach(function (h) { if (id !== "all" && h.id !== id) return; h.vocabulario.forEach(function (v) { if (v && v.palabra) out.push({ v: v, h: h }); }); });
+    return out;
+  }
+  function quizNext() {
+    var pool = wordPool(VQ.pool);
+    if (pool.length < 4) pool = wordPool("all");
+    if (pool.length < 2) return;
+    var pick;
+    do { pick = pool[Math.floor(Math.random() * pool.length)]; } while (VQ.cur && pick.v === VQ.cur.v);
+    var opts = shuffle([pick].concat(shuffle(pool.filter(function (x) { return x.v.palabra !== pick.v.palabra; })).slice(0, 3)));
+    VQ.cur = pick; VQ.lock = false;
+    $("#vq-def").textContent = pick.v.significado;
+    $("#vq-ex").innerHTML = ""; $("#vq-next").hidden = true;
+    $("#vq-opts").innerHTML = opts.map(function (x) { return '<button type="button" class="vq-o" data-vq="' + esc(x.v.palabra) + '">' + esc(x.v.palabra) + "</button>"; }).join("");
+    if (ANIM) G.from("#vq-opts .vq-o", { y: 14, opacity: 0, stagger: .05, duration: .35, ease: "power2.out", clearProps: "transform,opacity" });
+  }
+  function quizAnswer(btn) {
+    if (VQ.lock || !VQ.cur) return;
+    VQ.lock = true;
+    var w = VQ.cur.v.palabra, ok = btn.getAttribute("data-vq") === w;
+    $$("#vq-opts .vq-o").forEach(function (b) { if (b.getAttribute("data-vq") === w) b.classList.add("right"); b.disabled = true; });
+    if (!ok) btn.classList.add("wrong");
+    VQ.score += ok ? 1 : 0; VQ.streak = ok ? VQ.streak + 1 : 0;
+    $("#vq-score").textContent = VQ.score; $("#vq-streak").textContent = VQ.streak;
+    $("#vq-ex").innerHTML = (ok ? "<strong>Yes!</strong> " : "It's <strong>" + esc(w) + "</strong>. ") + (VQ.cur.v.ejemplo ? "“" + example(VQ.cur.v).html + "” · <em>" + esc(VQ.cur.h.titulo) + "</em>" : "");
+    $("#vq-next").hidden = false;
+    speak(w);
+    if (ANIM) { if (ok) G.fromTo(btn, { scale: .9 }, { scale: 1, duration: .5, ease: "back.out(3)" }); else G.fromTo(btn, { x: -8 }, { x: 0, duration: .5, ease: "elastic.out(1,.3)" }); }
+    if (ok && VQ.streak % 5 === 0) { burst(btn, false); toast("🔥 <b>" + VQ.streak + " in a row!</b> Amazing!"); }
+  }
+  // flip cards with the keyboard too
+  document.addEventListener("keydown", function (e) {
+    var fl = e.target;
+    if (!fl.classList || !fl.classList.contains("flash") || (e.key !== "Enter" && e.key !== " ")) return;
+    e.preventDefault(); fl.setAttribute("aria-pressed", fl.getAttribute("aria-pressed") !== "true");
+  });
+  wordsMeter();
+  if ($("#vq")) quizNext();
 
   /* menu */
   var menuBtn = $("#menu-btn"), links = $("#links");

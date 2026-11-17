@@ -11,6 +11,8 @@
        [SOUND: ...]     -> efecto de sonido / [VISUAL: ...] -> lo que se ve
        > texto          -> frase destacada (moraleja, reflexion)
      Cada linea es un parrafo (o un verso en las canciones).
+   - "vocabulario": palabra, tipo, significado, ejemplo (una frase de la historia)
+     y "formas" (otras formas que tambien se subrayan en el texto: hid, bloomed...).
    - "reflexion" son las preguntas o ideas para despues de ver la historia.
    - "cita" de cada profe es la frase que se destaca junto a su foto.
    ===================================================================== */
@@ -123,9 +125,22 @@ window.SITE = {
         vocabulario: ["Daily routines", "Emotions", "Free time"]
       },
       vocabulario: [
-        { palabra: "Morning", significado: "The first part of the day, before noon." },
-        { palabra: "Laugh", significado: "To make happy sounds because something is funny." },
-        { palabra: "Lonely", significado: "Sad because you are alone." }
+        { palabra: "mirror", tipo: "noun", significado: "A glass where you can see yourself.",
+          ejemplo: "Every morning, I looked in the mirror and hated my face" },
+        { palabra: "hide", tipo: "verb", significado: "To put something where nobody can see it.", formas: ["hid", "hiding"],
+          ejemplo: "I wanted him to notice me, so I hid who I was inside" },
+        { palabra: "pretend", tipo: "verb", significado: "To act like something is true when it is not.", formas: ["pretending", "pretended"],
+          ejemplo: "I was pretending all day, and I lost my own voice" },
+        { palabra: "fit in", tipo: "phrasal verb", significado: "To be accepted by a group because you are like them.",
+          ejemplo: "I changed to fit in, but it was never my choice" },
+        { palabra: "accept", tipo: "verb", significado: "To be happy with something (or someone) as it is.", formas: ["accepted"],
+          ejemplo: "Even when life is difficult, I can learn to accept myself" },
+        { palabra: "approval", tipo: "noun", significado: "When people say or show that you are good or right.",
+          ejemplo: "I can love myself, I don't need their approval" },
+        { palabra: "enough", tipo: "adjective", significado: "As much as you need. Not too little.",
+          ejemplo: "I am enough just as I am, I don't need a perfect face" },
+        { palabra: "diary", tipo: "noun", significado: "A book where you write about your days and feelings.",
+          ejemplo: "Dad had someone else, and Mom found my diary on the floor" }
       ],
       actividades: [
         { id: "fms-listening", habilidad: "listening", titulo: "Song word search", instrucciones: "Listen to the song Finding Myself, spot the verbs in the past simple and find them in the word search.",
@@ -222,9 +237,22 @@ ALL THREE: Shhhhh!
         vocabulario: ["Nature", "The city", "Adjectives"]
       },
       vocabulario: [
-        { palabra: "Forest", significado: "A large area full of trees." },
-        { palabra: "Clean", significado: "Without dirt or rubbish." },
-        { palabra: "Protect", significado: "To keep something safe from harm." }
+        { palabra: "recess", tipo: "noun", significado: "The free time between classes at school.",
+          ejemplo: "We were in tenth grade, and during recess, a friend said, \"Let's play Charlie Charlie!\"" },
+        { palabra: "corridor", tipo: "noun", significado: "A long, narrow space inside a building with doors on each side.",
+          ejemplo: "The corridor was dark, and the air was very cold." },
+        { palabra: "blink", tipo: "verb", significado: "To go on and off very fast (a light), or to close and open your eyes.", formas: ["blinking", "blinked"],
+          ejemplo: "The sinks were dirty, the light was blinking, and the mirror was broken." },
+        { palabra: "flashlight", tipo: "noun", significado: "A small light that you carry in your hand.",
+          ejemplo: "Rosaly, your friend had a flashlight, right?" },
+        { palabra: "reflection", tipo: "noun", significado: "The image you see in a mirror or in water.", formas: ["reflections"],
+          ejemplo: "One girl looked at her reflection and said, \"That's not my face!\"" },
+        { palabra: "whisper", tipo: "verb", significado: "To speak very quietly, with your breath.", formas: ["whispered", "whispering"],
+          ejemplo: "Then, one reflection came closer to the glass and whispered something." },
+        { palabra: "stuck", tipo: "adjective", significado: "Not able to move or open.",
+          ejemplo: "We ran to the door, but we couldn't open it. It was stuck!" },
+        { palabra: "legend", tipo: "noun", significado: "An old story that many people tell, but nobody knows if it is true.", formas: ["legends"],
+          ejemplo: "They are part of our student culture and keep our school legends alive." }
       ],
       actividades: [
         { id: "green-tunja-who", habilidad: "reading", titulo: "Who is who?", instrucciones: "Open the boxes one by one and say who each character from the episode is.",
@@ -287,9 +315,22 @@ ALL THREE: Shhhhh!
         vocabulario: ["Travel", "Feelings", "Life plans"]
       },
       vocabulario: [
-        { palabra: "Abroad", significado: "In or to another country." },
-        { palabra: "Dream", significado: "Something you really want to do in the future." },
-        { palabra: "Brave", significado: "Ready to do something difficult or scary." }
+        { palabra: "drawer", tipo: "noun", significado: "A box in a table or desk that you pull out to keep things.", formas: ["drawers"],
+          ejemplo: "Then she puts it in a drawer." },
+        { palabra: "trunk", tipo: "noun", significado: "A big, strong box for keeping old things.",
+          ejemplo: "In an old trunk she finds a silver watch and a yellow note." },
+        { palabra: "clue", tipo: "noun", significado: "Something that helps you find the answer to a mystery.", formas: ["clues"],
+          ejemplo: "Now she has another clue, but she is afraid." },
+        { palabra: "stranger", tipo: "noun", significado: "A person you do not know.",
+          ejemplo: "She looks like a stranger." },
+        { palabra: "proof", tipo: "noun", significado: "Something that shows that a thing is true.",
+          ejemplo: "This is the proof." },
+        { palabra: "upload", tipo: "verb", significado: "To send a file from your computer to the internet.", formas: ["uploaded"],
+          ejemplo: "She decides to upload the video to the internet from that same computer." },
+        { palabra: "handcuffs", tipo: "noun", significado: "Two metal rings that the police put on a person's hands.",
+          ejemplo: "They separate the two women and put handcuffs on both of them." },
+        { palabra: "justice", tipo: "noun", significado: "When people are treated in a fair and right way.",
+          ejemplo: "She wanted justice, and she almost became the person she hated." }
       ],
       actividades: [
         { id: "brave-enough-to-leave-1", habilidad: "reading", titulo: "Escape the House", instrucciones: "Read carefully and complete the reading challenge.",
@@ -361,9 +402,22 @@ Every evening, when the Moon appeared in the sky, Lila opened her petals and sho
         vocabulario: ["Nature sounds", "Magic and fantasy"]
       },
       vocabulario: [
-        { palabra: "Whisper", significado: "To speak very quietly." },
-        { palabra: "Breeze", significado: "A soft, gentle wind." },
-        { palabra: "Silence", significado: "When there is no sound at all." }
+        { palabra: "bud", tipo: "noun", significado: "A flower before it opens.",
+          ejemplo: "Lila was a small purple bud with green leaves and closed petals." },
+        { palabra: "shy", tipo: "adjective", significado: "Nervous and quiet when you are with other people.",
+          ejemplo: "She lived in a quiet corner of a meadow, and she was very shy." },
+        { palabra: "meadow", tipo: "noun", significado: "A field with grass and wild flowers.",
+          ejemplo: "One beautiful morning, the meadow smelled of wet grass and sweet honey." },
+        { palabra: "bloom", tipo: "verb", significado: "To open (a flower).", formas: ["bloomed", "blooming"],
+          ejemplo: "All the flowers had bloomed, but Lila was still a little bud." },
+        { palabra: "petal", tipo: "noun", significado: "One of the soft, colorful parts of a flower.", formas: ["petals"],
+          ejemplo: "Slowly, one of her petals opened." },
+        { palabra: "firefly", tipo: "noun", significado: "A small insect that shines with light at night.",
+          ejemplo: "It was Chispa, a kind firefly who was awake when most of the meadow was sleeping." },
+        { palabra: "jealous", tipo: "adjective", significado: "Unhappy because someone has something that you want.",
+          ejemplo: "They felt jealous because people were no longer paying attention to them." },
+        { palabra: "apologize", tipo: "verb", significado: "To say that you are sorry.", formas: ["apologized"],
+          ejemplo: "She was happy that they had apologized." }
       ],
       actividades: [
         { id: "lila-reading", habilidad: "reading", titulo: "Reading quiz", instrucciones: "Read each question about Lila's story and choose the correct answer. Type your name to start.",
