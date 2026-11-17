@@ -62,7 +62,7 @@
   var PLATFORMS = [[/youtu\.?be/, "YouTube"], [/drive\.google/, "Google Drive"], [/docs\.google\.com\/forms|forms\.gle/, "Google Forms"],
     [/docs\.google/, "Google Docs"], [/vimeo/, "Vimeo"], [/canva/, "Canva"], [/wordwall/, "Wordwall"], [/genial\.?ly/, "Genially"],
     [/learningapps/, "LearningApps"], [/educaplay/, "Educaplay"], [/liveworksheets/, "Liveworksheets"], [/padlet/, "Padlet"],
-    [/vocaroo/, "Vocaroo"], [/spotify/, "Spotify"], [/edpuzzle/, "Edpuzzle"], [/quizizz|wayground/, "Quizizz"], [/kahoot/, "Kahoot!"],
+    [/vocaroo/, "Vocaroo"], [/spotify/, "Spotify"], [/edpuzzle/, "Edpuzzle"], [/wayground/, "Wayground"], [/quizizz/, "Quizizz"], [/gridgenius/, "Grid Genius"], [/kahoot/, "Kahoot!"],
     [/h5p/, "H5P"], [/soundcloud/, "SoundCloud"], [/flip\.com/, "Flip"], [/lastfiveminutes\.github\.io/, "The Last Five Minutes game"]];
   function platform(u) {
     if (u.charAt(0) === "#") return "On this page";
@@ -278,7 +278,7 @@
       (photos ? '<div class="practice"><div class="practice-head"><h3>Photos</h3></div><div class="gallery">' + photos + "</div></div>" : "") +
       (h.actividades.length ? '<div class="practice"><div class="practice-head"><h3>Practice <em>here!</em></h3>' +
         '<div class="ch-meter"><span data-ch-count="' + h.id + '">' + dn + " / " + h.actividades.length + '</span><div class="bar"><span data-ch-bar="' + h.id + '" style="width:' + Math.round(dn / h.actividades.length * 100) + "%;--b:var(--accent)\"></span></div></div></div>" +
-        '<div class="acts">' + h.actividades.map(function (a, j) { return activity(h, a, j); }).join("") + "</div></div>" : "") +
+        '<div class="acts" style="--n:' + h.actividades.length + '" data-n="' + h.actividades.length + '">' + h.actividades.map(function (a, j) { return activity(h, a, j); }).join("") + "</div></div>" : "") +
       "</div></article>";
   }
 
@@ -291,10 +291,11 @@
     var sk = skillOf(a.habilidad), url = cleanUrl(a.link), internal = url.charAt(0) === "#";
     return '<div class="act s-' + sk.cls + (done[a.id] ? " is-done" : "") + '" id="act-' + esc(a.id) + '" data-act="' + esc(a.id) + '">' +
       '<div class="act-media"><div class="im" style="' + bgCrop(a) + '"></div><span class="pill">' + icon(sk.cls) + esc(sk.label) + '</span><span class="act-num">' + pad(j + 1) + "</span>" +
+      (url ? '<span class="host">' + (internal ? "↓ " : "") + esc(platform(url)) + "</span>" : "") +
       '<span class="stamp" aria-hidden="true"><span><b>✓</b>DONE</span></span></div>' +
       '<div class="act-body">' + (a.titulo ? "<h4>" + esc(a.titulo) + "</h4>" : "") + (a.instrucciones ? "<p>" + esc(a.instrucciones) + "</p>" : "") +
       '<div class="act-foot">' + (url
-        ? "<span><a class=\"act-open\" href=\"" + esc(url) + '"' + (internal ? ' data-filter-story="' + h.id + '"' : ' target="_blank" rel="noopener"') + ">" + esc(a.boton || "Open activity") + ' <span class="arr" aria-hidden="true">' + (internal ? "↓" : "↗") + '</span></a><span class="host">' + esc(platform(url)) + "</span></span>"
+        ? '<a class="act-open" href="' + esc(url) + '"' + (internal ? ' data-filter-story="' + h.id + '"' : ' target="_blank" rel="noopener"') + ">" + esc(a.boton || "Open activity") + ' <span class="arr" aria-hidden="true">' + (internal ? "↓" : "↗") + "</span></a>"
         : '<span class="soon-txt">Coming soon</span>') + doneBtn(a.id) + "</div></div></div>";
   }
 
@@ -498,6 +499,7 @@
     var box = group === "vocab" ? $("#vocab-cards") : $("#ix-cards");
     if (!box) return;
     var items = $$('[data-fg="' + group + '"]', box);
+    revealNow(items);
     var state = ANIM && window.Flip ? window.Flip.getState(items) : null;
     items.forEach(function (el) { el.style.display = value === "all" || el.getAttribute("data-fv") === value ? "" : "none"; if (group === "vocab") el.setAttribute("aria-pressed", "false"); });
     if (state) {
@@ -580,148 +582,201 @@
 
   var mm = G.matchMedia();
   var fine = matchMedia("(pointer: fine)").matches;
+  var root = document.documentElement;
 
-  // split headings into lines/words that rise from a mask
-  function splitRise(el, opts) {
-    if (!window.SplitText || LITE) return G.from(el, Object.assign({ y: 40, opacity: 0, duration: .9, ease: "power3.out" }, opts));
-    var s = new window.SplitText(el, { type: "lines,words", linesClass: "split-line", autoSplit: false });
-    return G.from(s.words, Object.assign({ yPercent: 110, rotate: 4, duration: .9, ease: "power4.out", stagger: .05 }, opts));
+  // reveal on scroll WITHOUT the flash: every element gets its start state right now (off screen),
+  // not when it is already visible; at the end the inline styles are removed so CSS hovers keep working
+  function reveal(targets, vars, start) {
+    var els = typeof targets === "string" ? $$(targets) : targets;
+    if (!els.length) return;
+    var stagger = vars.stagger || 0;
+    els.forEach(function (el, i) {
+      var v = Object.assign({ duration: .8, ease: "power3.out" }, vars, { paused: true, clearProps: "transform,opacity",
+        onComplete: function () { el._rv = null; } });
+      delete v.stagger;
+      if (typeof v.rotation === "function") v.rotation = v.rotation(i);
+      el._rv = G.from(el, v);
+    });
+    ST.batch(els, { start: start || "top 92%", once: true, onEnter: function (b) {
+      b.forEach(function (el, i) { if (el._rv) G.delayedCall(i * stagger, function () { if (el._rv) el._rv.play(); }); });
+    } });
   }
 
-  // loader -> hero intro
-  var tl = G.timeline({ defaults: { ease: "power3.out" } });
-  if (LITE) { $("#loader").remove(); }
-  else tl.to(".loader-book path", { strokeDashoffset: 0, duration: .7, ease: "power2.inOut" })
+  // loader plays at once; everything else waits for the real fonts, so headings are split and measured only once
+  var intro = G.timeline();
+  if (LITE) $("#loader").remove();
+  else intro.to(".loader-book path", { strokeDashoffset: 0, duration: .7, ease: "power2.inOut" })
     .from(".loader-name", { y: 20, opacity: 0, duration: .45 }, "-=.4")
     .to("#loader", { yPercent: -100, duration: .7, ease: "power4.inOut" }, "+=.1")
     .set("#loader", { display: "none" });
-  tl.add(splitRise("#hero-title", { stagger: .07, duration: 1.1 }), "-=.45");
-  tl.from("[data-hero]", { y: 30, opacity: 0, stagger: .1, duration: .8 }, "-=.8");
-  tl.from(".top-in > *", { y: -20, opacity: 0, stagger: .06, duration: .6, clearProps: "transform,opacity" }, "-=.8");
+  root.classList.add("pre");
+  var started = false;
+  function start() { if (started) return; started = true; motion(); }
+  if (document.fonts && document.fonts.load) {
+    Promise.all(["850 1em Fraunces", "italic 600 1em Fraunces", "700 1em 'Atkinson Hyperlegible'", "700 1em Caveat"].map(function (f) { return document.fonts.load(f); }))
+      .then(function () { return document.fonts.ready; }).then(start, start);
+  }
+  setTimeout(start, 1600);
 
-  // hero fan of covers
-  mm.add("(min-width: 980px)", function () {
-    var cards = $$(".fan-card"), fan = $("#fan"), hero = $(".hero"), ready = false, mv = null;
-    var spots = [{ x: -58, y: -51, r: -7 }, { x: 60, y: -56, r: 5 }, { x: -62, y: 53, r: 4 }, { x: 56, y: 50, r: -6 }];
-    function spot(i) { return spots[i] || spots[0]; }
-    cards.forEach(function (c, i) { var s = spot(i); G.set(c, { xPercent: -50 + s.x, yPercent: -50 + s.y, rotation: s.r, zIndex: i + 1 }); });
-    tl.from(cards, { yPercent: 60, rotation: 0, xPercent: -50, opacity: 0, scale: .7, duration: 1.2, stagger: .1, ease: "expo.out" }, "-=1.1");
-    tl.call(function () { ready = true; });
-    if (fine && !LITE) {
-      // hover: one card comes to the front at once (z-index is never tweened), the others step back
-      var leaveT = 0;
-      var rest = function () {
-        cards.forEach(function (o, j) { G.to(o, { scale: 1, y: 0, opacity: 1, rotation: spot(j).r, duration: .45, ease: "power3.out", overwrite: "auto" }); });
-      };
-      cards.forEach(function (c) {
-        var on = function () {
-          if (!ready) return;
-          clearTimeout(leaveT);
-          cards.forEach(function (o, j) {
-            if (o === c) return;
-            G.set(o, { zIndex: j + 1 });
-            G.to(o, { scale: .97, y: 0, opacity: .72, rotation: spot(j).r, duration: .35, ease: "power3.out", overwrite: "auto" });
-          });
-          G.set(c, { zIndex: 20 });
-          G.to(c, { scale: 1.08, y: -10, opacity: 1, rotation: 0, duration: .35, ease: "power3.out", overwrite: "auto" });
-        };
-        c.addEventListener("mouseenter", on);
-        c.addEventListener("focus", on);
-        c.addEventListener("mouseleave", function () { clearTimeout(leaveT); leaveT = setTimeout(rest, 90); });
-        c.addEventListener("blur", function () { clearTimeout(leaveT); leaveT = setTimeout(rest, 90); });
-      });
-      // the whole table tilts a little toward the pointer (flat, no 3D sorting between cards)
-      G.set(fan, { transformPerspective: 1400 });
-      var rx = G.quickTo(fan, "rotationX", { duration: .8, ease: "power3" }), ry = G.quickTo(fan, "rotationY", { duration: .8, ease: "power3" });
-      var glow = $("#hero-glow"), gx = G.quickTo(glow, "x", { duration: .6 }), gy = G.quickTo(glow, "y", { duration: .6 });
-      mv = function (e) { var r = hero.getBoundingClientRect(); var px = (e.clientX - r.left) / r.width - .5, py = (e.clientY - r.top) / r.height - .5; ry(px * 10); rx(-py * 7); gx(e.clientX - r.left); gy(e.clientY - r.top); glow.style.opacity = 1; };
-      hero.addEventListener("mousemove", mv);
+  function motion() {
+    // split headings into lines/words that rise from a mask
+    function splitRise(el, opts) {
+      if (!window.SplitText || LITE) return G.from(el, Object.assign({ y: 40, opacity: 0, duration: .9, ease: "power3.out" }, opts));
+      var s = new window.SplitText(el, { type: "lines,words", linesClass: "split-line", autoSplit: false });
+      return G.from(s.words, Object.assign({ yPercent: 110, rotate: 4, duration: .9, ease: "power4.out", stagger: .05 }, opts));
     }
-    if (!LITE) G.to(fan, { y: -12, duration: 3, yoyo: true, repeat: -1, ease: "sine.inOut" });
-    // the covers drift away as you scroll
-    G.to(fan, { yPercent: 18, opacity: .3, ease: "none", scrollTrigger: { trigger: ".hero", start: "top top", end: "bottom top", scrub: true } });
-    return function () { if (mv) hero.removeEventListener("mousemove", mv); };
-  });
-  mm.add("(max-width: 979px)", function () {
-    tl.from(".fan-card", { y: 60, opacity: 0, stagger: .08, duration: .9 }, "-=1");
-  });
-  G.to(".hero-text", { yPercent: -12, opacity: .2, ease: "none", scrollTrigger: { trigger: ".hero", start: "top top", end: "bottom top", scrub: true } });
 
-  // magnetic buttons
-  if (fine && !LITE) $$(".magnet").forEach(function (b) {
-    var qx = G.quickTo(b, "x", { duration: .4, ease: "power3" }), qy = G.quickTo(b, "y", { duration: .4, ease: "power3" });
-    b.addEventListener("mousemove", function (e) { var r = b.getBoundingClientRect(); qx((e.clientX - r.left - r.width / 2) * .3); qy((e.clientY - r.top - r.height / 2) * .35); });
-    b.addEventListener("mouseleave", function () { qx(0); qy(0); });
-  });
+    // hero intro (starts while the loader slides away)
+    var tl = G.timeline({ defaults: { ease: "power3.out" }, delay: Math.max(0, intro.duration() - .45 - intro.time()) });
+    tl.add(splitRise("#hero-title", { stagger: .07, duration: 1.1 }));
+    tl.from("[data-hero]", { y: 30, opacity: 0, stagger: .1, duration: .8 }, "-=.8");
+    tl.from(".top-in > *", { y: -20, opacity: 0, stagger: .06, duration: .6, clearProps: "transform,opacity" }, "-=.8");
+    root.classList.remove("pre");
 
-  // section headings
-  $$("[data-split]").forEach(function (el) {
-    var tw = splitRise(el, { paused: true });
-    ST.create({ trigger: el, start: "top 85%", once: true, onEnter: function () { tw.play(); } });
-  });
-  ST.batch("[data-reveal]", { start: "top 88%", once: true, onEnter: function (b) { G.from(b, { y: 36, opacity: 0, duration: .9, stagger: .12, ease: "power3.out" }); } });
-  ST.batch("[data-pop]", { start: "top 88%", once: true, onEnter: function (b) { G.from(b, LITE ? { y: 40, opacity: 0, duration: .6, stagger: .08 } : { y: 60, opacity: 0, rotation: function (i) { return i % 2 ? 6 : -6; }, scale: .9, duration: 1, stagger: .12, ease: "back.out(1.6)" }); } });
-  ST.batch(".obj-ic", { start: "top 90%", once: true, onEnter: function (b) { G.from(b, { scale: 0, rotation: -90, duration: .8, stagger: .08, ease: "back.out(2)" }); } });
-
-  // horizontal story picker (pinned on desktop)
-  mm.add("(min-width: 1000px) and (min-height: 620px)", function () {
-    var track = $("#h-track"), pin = $("#h-pin");
-    $(".picker").classList.add("pinned");
-    function dist() { return Math.max(0, track.scrollWidth - innerWidth); }
-    var tw = G.to(track, { x: function () { return -dist(); }, ease: "none",
-      scrollTrigger: { trigger: pin, start: "center center", end: function () { return "+=" + dist(); }, pin: true, scrub: .8, invalidateOnRefresh: true, anticipatePin: 1 } });
-    $$(".pick", track).forEach(function (p) {
-      G.from($(".pick-in", p), { y: 40, opacity: 0, duration: .8, ease: "power3.out", scrollTrigger: { trigger: p, containerAnimation: tw, start: "left 85%", toggleActions: "play none none reverse" } });
-      if (!LITE) G.fromTo($(".pick-im", p), { xPercent: -5 }, { xPercent: 5, ease: "none", scrollTrigger: { trigger: p, containerAnimation: tw, start: "left right", end: "right left", scrub: true } });
+    // hero fan of covers
+    var fanDealt = false;
+    mm.add("(min-width: 980px)", function () {
+      var cards = $$(".fan-card"), fan = $("#fan"), hero = $(".hero"), ready = false, mv = null;
+      var spots = [{ x: -58, y: -51, r: -7 }, { x: 60, y: -56, r: 5 }, { x: -62, y: 53, r: 4 }, { x: 56, y: 50, r: -6 }];
+      function spot(i) { return spots[i] || spots[0]; }
+      cards.forEach(function (c, i) { var s = spot(i); G.set(c, { xPercent: -50 + s.x, yPercent: -50 + s.y, rotation: s.r, zIndex: i + 1 }); });
+      // dealt once, on its own (not inside the intro): crossing the breakpoint later just shows them
+      if (!fanDealt) { fanDealt = true; G.from(cards, { yPercent: 60, rotation: 0, xPercent: -50, opacity: 0, scale: .7, duration: 1.2, stagger: .1, ease: "expo.out", delay: tl.delay() + .25, onComplete: function () { ready = true; } }); }
+      else ready = true;
+      if (fine && !LITE) {
+        // hover: one card comes to the front at once (z-index is never tweened), the others step back
+        var leaveT = 0;
+        var rest = function () {
+          cards.forEach(function (o, j) { G.to(o, { scale: 1, y: 0, opacity: 1, rotation: spot(j).r, duration: .45, ease: "power3.out", overwrite: "auto" }); });
+        };
+        var handlers = [];
+        cards.forEach(function (c) {
+          var on = function () {
+            if (!ready) return;
+            clearTimeout(leaveT);
+            cards.forEach(function (o, j) {
+              if (o === c) return;
+              G.set(o, { zIndex: j + 1 });
+              G.to(o, { scale: .97, y: 0, opacity: .72, rotation: spot(j).r, duration: .35, ease: "power3.out", overwrite: "auto" });
+            });
+            G.set(c, { zIndex: 20 });
+            G.to(c, { scale: 1.08, y: -10, opacity: 1, rotation: 0, duration: .35, ease: "power3.out", overwrite: "auto" });
+          };
+          var off = function () { clearTimeout(leaveT); leaveT = setTimeout(rest, 90); };
+          ["mouseenter", "focus"].forEach(function (e) { c.addEventListener(e, on); handlers.push([c, e, on]); });
+          ["mouseleave", "blur"].forEach(function (e) { c.addEventListener(e, off); handlers.push([c, e, off]); });
+        });
+        // the whole table tilts a little toward the pointer (flat, no 3D sorting between cards)
+        G.set(fan, { transformPerspective: 1400 });
+        var rx = G.quickTo(fan, "rotationX", { duration: .8, ease: "power3" }), ry = G.quickTo(fan, "rotationY", { duration: .8, ease: "power3" });
+        var glow = $("#hero-glow"), gx = G.quickTo(glow, "x", { duration: .6 }), gy = G.quickTo(glow, "y", { duration: .6 });
+        mv = function (e) { var r = hero.getBoundingClientRect(); var px = (e.clientX - r.left) / r.width - .5, py = (e.clientY - r.top) / r.height - .5; ry(px * 10); rx(-py * 7); gx(e.clientX - r.left); gy(e.clientY - r.top); glow.style.opacity = 1; };
+        hero.addEventListener("mousemove", mv);
+      }
+      if (!LITE) G.to(fan, { y: -12, duration: 3, yoyo: true, repeat: -1, ease: "sine.inOut" });
+      // the covers drift away as you scroll
+      G.to(fan, { yPercent: 18, opacity: .3, ease: "none", scrollTrigger: { trigger: ".hero", start: "top top", end: "bottom top", scrub: true } });
+      return function () {
+        clearTimeout(leaveT);
+        if (mv) hero.removeEventListener("mousemove", mv);
+        (handlers || []).forEach(function (h) { h[0].removeEventListener(h[1], h[2]); });
+      };
     });
-    return function () { $(".picker").classList.remove("pinned"); };
-  });
-  G.from(".pick", { y: 80, opacity: 0, stagger: .1, duration: 1, ease: "power3.out", scrollTrigger: { trigger: "#h-pin", start: "top 85%", once: true } });
+    mm.add("(max-width: 979px)", function () {
+      if (fanDealt) return;
+      fanDealt = true;
+      G.from(".fan-card", { opacity: 0, stagger: .08, duration: .8, ease: "power2.out", delay: tl.delay() + .3, clearProps: "opacity" });
+    });
+    G.to(".hero-text", { yPercent: -12, opacity: .2, ease: "none", scrollTrigger: { trigger: ".hero", start: "top top", end: "bottom top", scrub: true } });
 
-  // chapters: the cover opens like a curtain, image parallax, cards deal in
-  $$(".chapter").forEach(function (ch) {
-    var stage = $("[data-stage]", ch), img = $(".stage-img", ch);
-    G.fromTo(stage, { scale: .86, opacity: .4 }, { scale: 1, opacity: 1, ease: "none", scrollTrigger: { trigger: stage, start: "top 95%", end: "top 45%", scrub: true } });
-    if (!LITE) G.fromTo(img, { yPercent: -6, scale: 1.15 }, { yPercent: 6, scale: 1, ease: "none", scrollTrigger: { trigger: stage, start: "top bottom", end: "bottom top", scrub: true } });
-    if (!LITE) G.from($(".ch-num", ch), { yPercent: 40, opacity: 0, ease: "none", scrollTrigger: { trigger: ch, start: "top bottom", end: "top 20%", scrub: true } });
-    G.from($(".ch-kicker", ch), { x: -30, opacity: 0, duration: .7, ease: "power3.out", scrollTrigger: { trigger: ch, start: "top 75%", once: true } });
-    var acts = $$(".act", ch);
-    if (acts.length) G.from(acts, Object.assign(LITE ? { y: 50, opacity: 0, duration: .6, stagger: .08, ease: "power2.out" } : { y: 90, rotationX: -25, rotation: function (i) { return (i % 2 ? 1 : -1) * 4; }, opacity: 0, duration: 1, stagger: .12, ease: "power3.out", transformPerspective: 900 }, {
-      scrollTrigger: { trigger: $(".acts", ch), start: "top 85%", once: true } }));
-    var minis = $$(".mini-words .flash", ch);
-    if (minis.length) ST.create({ trigger: minis[0], start: "top 85%", once: true, onEnter: function () {
-      // a little teaser: the first card flips and flips back
-      G.from(minis, { y: 30, opacity: 0, stagger: .1, duration: .6, ease: "back.out(1.7)" });
-      setTimeout(function () { if (minis[0].getAttribute("aria-pressed") === "false") { minis[0].setAttribute("aria-pressed", "true"); setTimeout(function () { minis[0].setAttribute("aria-pressed", "false"); }, 1300); } }, 900);
+    // magnetic buttons
+    if (fine && !LITE) $$(".magnet").forEach(function (b) {
+      var qx = G.quickTo(b, "x", { duration: .4, ease: "power3" }), qy = G.quickTo(b, "y", { duration: .4, ease: "power3" });
+      b.addEventListener("mousemove", function (e) { var r = b.getBoundingClientRect(); qx((e.clientX - r.left - r.width / 2) * .3); qy((e.clientY - r.top - r.height / 2) * .35); });
+      b.addEventListener("mouseleave", function () { qx(0); qy(0); });
+    });
+
+    // section headings
+    $$("[data-split]").forEach(function (el) {
+      var tw = splitRise(el, { paused: true });
+      ST.create({ trigger: el, start: "top 90%", once: true, onEnter: function () { tw.play(); } });
+    });
+    reveal("[data-reveal]", { y: 36, opacity: 0, duration: .9, stagger: .12 });
+    reveal("[data-pop]", LITE ? { y: 40, opacity: 0, duration: .6, stagger: .08 } : { y: 60, opacity: 0, rotation: function (i) { return i % 2 ? 6 : -6; }, scale: .9, duration: 1, stagger: .12, ease: "back.out(1.6)" });
+    reveal(".obj-ic", { scale: 0, rotation: -90, duration: .8, stagger: .08, ease: "back.out(2)" });
+
+    // horizontal story picker (pinned on desktop)
+    mm.add("(min-width: 1000px) and (min-height: 620px)", function () {
+      var track = $("#h-track"), pin = $("#h-pin");
+      $(".picker").classList.add("pinned");
+      function dist() { return Math.max(0, track.scrollWidth - innerWidth); }
+      var tw = G.to(track, { x: function () { return -dist(); }, ease: "none",
+        scrollTrigger: { trigger: pin, start: "center center", end: function () { return "+=" + dist(); }, pin: true, scrub: .8, invalidateOnRefresh: true, anticipatePin: 1 } });
+      $$(".pick", track).forEach(function (p) {
+        // cards that are on screen before the track moves are already shown; the rest slide their text in
+        if (p.offsetLeft + p.offsetWidth * .3 < innerWidth * .85) return;
+        G.from($(".pick-in", p), { y: 40, opacity: 0, duration: .8, ease: "power3.out", scrollTrigger: { trigger: p, containerAnimation: tw, start: "left 85%", toggleActions: "play none none reverse" } });
+      });
+      if (!LITE) $$(".pick", track).forEach(function (p) {
+        G.fromTo($(".pick-im", p), { xPercent: -5 }, { xPercent: 5, ease: "none", scrollTrigger: { trigger: p, containerAnimation: tw, start: "left right", end: "right left", scrub: true } });
+      });
+      return function () { $(".picker").classList.remove("pinned"); };
+    });
+    reveal($$(".pick"), { y: 80, opacity: 0, stagger: .1, duration: 1 }, "top 95%");
+
+    // chapters: the cover opens up, image parallax, cards deal in
+    $$(".chapter").forEach(function (ch) {
+      var stage = $("[data-stage]", ch), img = $(".stage-img", ch);
+      G.fromTo(stage, { scale: .86, opacity: .4 }, { scale: 1, opacity: 1, ease: "none", scrollTrigger: { trigger: stage, start: "top 95%", end: "top 45%", scrub: true } });
+      if (!LITE) G.fromTo(img, { yPercent: -6, scale: 1.15 }, { yPercent: 6, scale: 1, ease: "none", scrollTrigger: { trigger: stage, start: "top bottom", end: "bottom top", scrub: true } });
+      if (!LITE) G.from($(".ch-num", ch), { yPercent: 40, opacity: 0, ease: "none", scrollTrigger: { trigger: ch, start: "top bottom", end: "top 20%", scrub: true } });
+      G.from($(".ch-kicker", ch), { x: -30, opacity: 0, duration: .7, ease: "power3.out", scrollTrigger: { trigger: ch, start: "top 80%", once: true } });
+      // each row of cards deals in when it reaches the screen (not all of them at once)
+      reveal($$(".act", ch), LITE ? { y: 50, opacity: 0, duration: .6, stagger: .08, ease: "power2.out" }
+        : { y: 70, opacity: 0, rotation: function (i) { return (i % 2 ? 1 : -1) * 3; }, scale: .94, duration: .9, stagger: .1, ease: "power3.out" });
+      var minis = $$(".mini-words .flash", ch);
+      if (minis.length) {
+        reveal(minis, { y: 30, opacity: 0, stagger: .1, duration: .6, ease: "back.out(1.7)" });
+        // a little teaser: the first card flips and flips back
+        ST.create({ trigger: minis[0], start: "top 80%", once: true, onEnter: function () {
+          setTimeout(function () { if (minis[0].getAttribute("aria-pressed") === "false") { minis[0].setAttribute("aria-pressed", "true"); setTimeout(function () { minis[0].setAttribute("aria-pressed", "false"); }, 1300); } }, 900);
+        } });
+      }
+    });
+
+    // activity cards tilt toward the pointer (only once they have landed)
+    if (fine && !LITE) $$(".act").forEach(function (a) {
+      var rx = null, ry = null;
+      a.addEventListener("mousemove", function (e) {
+        if (a._rv) return;
+        if (!rx) { G.set(a, { transformPerspective: 900 }); rx = G.quickTo(a, "rotationX", { duration: .5, ease: "power3" }); ry = G.quickTo(a, "rotationY", { duration: .5, ease: "power3" }); }
+        var r = a.getBoundingClientRect(); ry(((e.clientX - r.left) / r.width - .5) * 8); rx(-((e.clientY - r.top) / r.height - .5) * 8);
+      });
+      a.addEventListener("mouseleave", function () { if (rx) { rx(0); ry(0); } });
+    });
+
+    // vocabulary + index cards deal in
+    reveal(".cards .flash", LITE ? { y: 40, opacity: 0, duration: .5, stagger: .04 } : { y: 60, rotation: function () { return (Math.random() - .5) * 14; }, opacity: 0, duration: .8, stagger: .06, ease: "back.out(1.5)" });
+    reveal(".ix", { x: -30, opacity: 0, duration: .6, stagger: .05 });
+    reveal(".filter", { y: 20, opacity: 0, stagger: .04, duration: .5 });
+
+    // progress: ring, bars and stickers stay hidden (CSS) until the section arrives, then fill
+    ST.create({ trigger: "#prog-body", start: "top 95%", once: true, onEnter: function () {
+      var body = $("#prog-body"), v = $("#ring-val"), num = $("#ring-num"), c = counts();
+      body.classList.add("shown");
+      if (v) { var full = parseFloat(v.getAttribute("stroke-dasharray")); G.fromTo(v, { attr: { "stroke-dashoffset": full } }, { attr: { "stroke-dashoffset": full * (1 - c.p / 100) }, duration: 1.6, ease: "power3.out" }); }
+      var o = { n: 0 }; num.textContent = "0%"; G.to(o, { n: c.p, duration: 1.6, ease: "power3.out", onUpdate: function () { num.textContent = Math.round(o.n) + "%"; } });
+      G.fromTo("#prog-body .bar span", { scaleX: 0 }, { scaleX: 1, transformOrigin: "0 50%", duration: 1.2, ease: "power3.out", delay: .2, stagger: .04, clearProps: "transform" });
+      G.fromTo("#prog-body .sticker", { scale: .6, opacity: 0 }, { scale: 1, opacity: 1, stagger: .1, duration: .7, ease: "back.out(2)", delay: .3, clearProps: "transform,opacity" });
     } });
-  });
 
-  // activity cards tilt toward the pointer
-  if (fine && !LITE) $$(".act").forEach(function (a) {
-    var rx = G.quickTo(a, "rotationX", { duration: .5, ease: "power3" }), ry = G.quickTo(a, "rotationY", { duration: .5, ease: "power3" });
-    G.set(a, { transformPerspective: 900 });
-    a.addEventListener("mousemove", function (e) { var r = a.getBoundingClientRect(); ry(((e.clientX - r.left) / r.width - .5) * 10); rx(-((e.clientY - r.top) / r.height - .5) * 10); });
-    a.addEventListener("mouseleave", function () { rx(0); ry(0); });
-  });
+    // footer
+    G.from(".foot-big", { yPercent: 40, opacity: 0, duration: 1, ease: "power3.out", scrollTrigger: { trigger: ".foot", start: "top 95%", once: true } });
 
-  // vocabulary + index cards deal in
-  ST.batch(".cards .flash", { start: "top 92%", once: true, onEnter: function (b) { G.from(b, LITE ? { y: 40, opacity: 0, duration: .5, stagger: .04 } : { y: 70, rotation: function () { return (Math.random() - .5) * 16; }, opacity: 0, duration: .8, stagger: .06, ease: "back.out(1.5)" }); } });
-  ST.batch(".ix", { start: "top 94%", once: true, onEnter: function (b) { G.from(b, { x: -30, opacity: 0, duration: .6, stagger: .05, ease: "power3.out" }); } });
-  ST.batch(".filters", { start: "top 92%", once: true, onEnter: function (b) { G.from($$(".filter", b[0]), { y: 20, opacity: 0, stagger: .05, duration: .5, ease: "power3.out" }); } });
+    // images that load late change heights: keep triggers right
+    if (document.readyState === "complete") ST.refresh();
+    else addEventListener("load", function () { ST.refresh(); });
+  }
 
-  // progress: ring and bars fill when they come into view
-  ST.create({ trigger: "#prog-body", start: "top 80%", once: true, onEnter: function () {
-    var v = $("#ring-val"), num = $("#ring-num"), c = counts();
-    if (v) { var full = parseFloat(v.getAttribute("stroke-dasharray")); G.fromTo(v, { attr: { "stroke-dashoffset": full } }, { attr: { "stroke-dashoffset": full * (1 - c.p / 100) }, duration: 1.6, ease: "power3.out" }); }
-    var o = { n: 0 }; G.to(o, { n: c.p, duration: 1.6, ease: "power3.out", onUpdate: function () { num.textContent = Math.round(o.n) + "%"; } });
-    G.from("#prog-body .bar span", { scaleX: 0, transformOrigin: "0 50%", duration: 1.2, ease: "power3.out", delay: .2, stagger: .04 });
-    G.from("#prog-body .sticker", { scale: .6, opacity: 0, stagger: .1, duration: .7, ease: "back.out(2)" });
-  } });
-
-  // footer
-  G.from(".foot-big", { yPercent: 40, opacity: 0, duration: 1, ease: "power3.out", scrollTrigger: { trigger: ".foot", start: "top 90%", once: true } });
-
-  // images that load late change heights: keep triggers right
-  addEventListener("load", function () { ST.refresh(); });
-  if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { ST.refresh(); });
+  function revealNow(els) { els.forEach(function (el) { if (el._rv) el._rv.progress(1); }); }
 })();

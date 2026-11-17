@@ -107,14 +107,14 @@ window.SITE = {
         { palabra: "Protect", significado: "To keep something safe from harm." }
       ],
       actividades: [
-        { id: "green-tunja-1", habilidad: "writing", titulo: "Describe and draw", instrucciones: "Draw your favorite forest from the podcast and write a short description of it.",
-          link: "", boton: "", imagen: "img/cover-behind-the-petals.webp", foco: "18% 52%", zoom: "260%" },
-        { id: "green-tunja-2", habilidad: "vocabulary", titulo: "Adjectives", instrucciones: "Listen again and drag the correct adjective into each sentence.",
-          link: "", boton: "", imagen: "img/cover-behind-the-petals.webp", foco: "50% 40%", zoom: "250%" },
-        { id: "green-tunja-3", habilidad: "reading", titulo: "Video quiz", instrucciones: "Watch the video about green areas and answer the questions.",
-          link: "", boton: "", imagen: "img/cover-behind-the-petals.webp", foco: "82% 50%", zoom: "260%" },
-        { id: "green-tunja-4", habilidad: "speaking", titulo: "Environmental ambassador", instrucciones: "Record a 1–2 minute video about how to take care of green areas in Tunja.",
-          link: "", boton: "", imagen: "img/cover-behind-the-petals.webp", foco: "50% 72%", zoom: "200%" }
+        { id: "green-tunja-who", habilidad: "reading", titulo: "Who is who?", instrucciones: "Open the boxes one by one and say who each character from the episode is.",
+          link: "https://wordwall.net/resource/123491145/who-is-who", boton: "Open Wordwall", imagen: "img/act-petals-who.webp", foco: "50% 50%", zoom: "cover" },
+        { id: "green-tunja-order", habilidad: "listening", titulo: "Put the story in order", instrucciones: "Listen to the episode again and choose what happened first, next and last.",
+          link: "https://wordwall.net/resource/123491582/put-the-story-in-order", boton: "Open Wordwall", imagen: "img/cover-behind-the-petals.webp", foco: "18% 52%", zoom: "260%" },
+        { id: "green-tunja-true-false", habilidad: "listening", titulo: "True or false", instrucciones: "The sentences fly by fast! Decide if each one is true or false before time runs out.",
+          link: "https://wordwall.net/resource/123491787/true-or-false", boton: "Open Wordwall", imagen: "img/cover-behind-the-petals.webp", foco: "82% 50%", zoom: "260%" },
+        { id: "green-tunja-crossword", habilidad: "vocabulary", titulo: "Charlie Charlie crossword", instrucciones: "Read the clues and complete the crossword with words from the episode.",
+          link: "https://share.gridgenius.app/p/behind-the-petals-episode-charlie-charlie-medium-Vxoy2Y", boton: "Open crossword", imagen: "img/act-petals-crossword.webp", foco: "50% 50%", zoom: "cover" }
       ],
       galeria: []
     },
@@ -174,14 +174,16 @@ window.SITE = {
         { palabra: "Silence", significado: "When there is no sound at all." }
       ],
       actividades: [
-        { id: "the-whispering-wind-chime-1", habilidad: "listening", titulo: "Watch, listen and answer", instrucciones: "The video pauses at different points. Choose the correct answer to continue.",
-          link: "", boton: "", imagen: "img/cover-lila.webp", foco: "20% 72%", zoom: "300%" },
-        { id: "the-whispering-wind-chime-2", habilidad: "writing", titulo: "Listen and write", instrucciones: "Listen to the audio and write the sentences. Check spelling and capital letters!",
-          link: "", boton: "", imagen: "img/cover-lila.webp", foco: "52% 50%", zoom: "300%" },
+        { id: "lila-reading", habilidad: "reading", titulo: "Reading quiz", instrucciones: "Read each question about Lila's story and choose the correct answer. Type your name to start.",
+          link: "https://wayground.com/join?gc=65595347&source=liveDashboard", boton: "Open Wayground", imagen: "img/cover-lila.webp", foco: "20% 72%", zoom: "300%" },
+        { id: "lila-listening", habilidad: "listening", titulo: "What happened in the meadow?", instrucciones: "Watch the illustrated video of Lila and complete the listening activities.",
+          link: "https://canva.link/fd7fe9z641rosgv", boton: "Open Canva", imagen: "img/act-lila-listening.webp", foco: "50% 0%", zoom: "cover" },
+        { id: "lila-writing", habilidad: "writing", titulo: "The story behind the flowers", instrucciones: "Practice the past simple, adjectives and connectors with the events and characters of the story.",
+          link: "https://canva.link/qpbhzuqghe436xt", boton: "Open Canva", imagen: "img/act-lila-writing.webp", foco: "50% 0%", zoom: "cover" },
+        { id: "lila-speaking", habilidad: "speaking", titulo: "Speaking challenge", instrucciones: "Play the board game in groups of four: roll, move and answer each question in English.",
+          link: "https://view.genially.com/6af7ea0649f94c0169784faa", boton: "Open Genially", imagen: "img/act-lila-speaking.webp", foco: "50% 50%", zoom: "cover" },
         { id: "the-whispering-wind-chime-3", habilidad: "vocabulary", titulo: "Magic flashcards", instrucciones: "Read the meanings and flip the cards to discover the secret words.",
-          link: "#vocabulary", boton: "Play here", imagen: "img/cover-lila.webp", foco: "72% 74%", zoom: "300%" },
-        { id: "the-whispering-wind-chime-4", habilidad: "speaking", titulo: "Tell a story", instrucciones: "Record yourself telling a famous story in your own words, then share the link.",
-          link: "https://vocaroo.com/", boton: "Open Vocaroo", imagen: "img/cover-lila.webp", foco: "80% 26%", zoom: "300%" }
+          link: "#vocabulary", boton: "Play here", imagen: "img/cover-lila.webp", foco: "72% 74%", zoom: "300%" }
       ],
       galeria: []
     }
