@@ -690,15 +690,23 @@ html.no-tts .say, html.no-tts .kw-top svg { display: none; }
 .tv.syncing .tv-body { -webkit-mask-image: linear-gradient(transparent, #000 10%, #000 88%, transparent); mask-image: linear-gradient(transparent, #000 10%, #000 88%, transparent); }
 .tv.syncing .tv-hint { display: none; }
 
-/* golden glitter on the word being sung / read */
+/* sparkles (used by the cursor) */
 .tv { position: relative; }
-.tv-fx { position: absolute; inset: 0; pointer-events: none; overflow: hidden; z-index: 2; }
 .spk { position: absolute; left: 0; top: 0; margin: -2px 0 0 -2px; border-radius: 50%; opacity: 0; background: radial-gradient(circle, #fff 0 20%, var(--g) 45%, transparent 72%); box-shadow: 0 0 8px 2px var(--g), 0 0 2px #fff; will-change: transform, opacity; }
 .spk.star { border-radius: 0; background: radial-gradient(circle, #fff 0 12%, var(--g) 30%, transparent 62%); box-shadow: none; clip-path: polygon(50% 0, 58% 42%, 100% 50%, 58% 58%, 50% 100%, 42% 58%, 0 50%, 42% 42%); filter: drop-shadow(0 0 6px var(--g)) drop-shadow(0 0 2px #fff); margin: -8px 0 0 -8px; }
-.tv.karaoke.syncing .timed.now .w.cur { color: transparent; background: linear-gradient(100deg, #f5b942 0%, #ffe08a 35%, #fffbe6 50%, #ffe08a 65%, #f5b942 100%) 0 0 / 220% 100%; -webkit-background-clip: text; background-clip: text; text-shadow: none; box-shadow: none; filter: drop-shadow(0 0 12px rgba(255, 207, 110, .75)); animation: goldsweep .9s linear infinite; }
-.tv.karaoke.syncing .timed.now .w.sung { color: #fff3d6; }
-@keyframes goldsweep { from { background-position: 110% 0; } to { background-position: -110% 0; } }
-@media (prefers-reduced-motion: reduce) { .tv.karaoke.syncing .timed.now .w.cur { animation: none; } }
+
+/* cursor: golden halo + sparkles (mouse only, added by app.js) */
+.cur-fx { position: fixed; inset: 0; z-index: 170; pointer-events: none; overflow: hidden; }
+.cur-halo { position: fixed; left: 0; top: 0; z-index: 171; width: 30px; height: 30px; margin: -15px 0 0 -15px; border-radius: 50%; pointer-events: none; opacity: 0;
+  border: 1.5px solid rgba(240, 180, 70, .75); background: radial-gradient(circle, rgba(255, 214, 120, .22), rgba(255, 214, 120, 0) 70%); box-shadow: 0 0 16px rgba(255, 200, 90, .35);
+  transition: opacity .3s, width .3s var(--ease), height .3s var(--ease), margin .3s var(--ease), background .3s, border-color .3s; }
+.cur-halo.on { opacity: 1; }
+.cur-fx .spk.cur-s { box-shadow: 0 0 7px 1px var(--g), 0 0 0 .5px rgba(160, 100, 10, .45); }
+.cur-fx .spk.star.cur-s { box-shadow: none; filter: drop-shadow(0 0 5px var(--g)) drop-shadow(0 0 1px rgba(150, 90, 0, .7)); }
+.cur-halo { outline: 1px solid rgba(60, 35, 0, .12); outline-offset: 1px; }
+
+.cur-halo.link { width: 50px; height: 50px; margin: -25px 0 0 -25px; border-color: rgba(240, 180, 70, .95); background: radial-gradient(circle, rgba(255, 214, 120, .3), rgba(255, 214, 120, 0) 70%); }
+.cur-halo.press { width: 22px; height: 22px; margin: -11px 0 0 -11px; }
 
 /* nothing shows before its entrance animation is ready (classes set by app.js) */
 .pre .hero-text, .pre .fan, .pre .top-in { visibility: hidden; }

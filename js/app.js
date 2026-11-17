@@ -332,11 +332,11 @@
     secs.forEach(function (s) { if (!s.title) return; var key = s.title.toLowerCase(); seen[key] = (seen[key] || 0) + 1; s.nth = seen[key]; });
     secs.forEach(function (s) { if (s.title) s.label = s.title + (seen[s.title.toLowerCase()] > 1 && s.nth > 1 ? ORD[s.nth] || " · again" : ""); });
     var starts = secs.map(function (s) { var x = s.items.filter(function (it) { return it.at != null; })[0]; return x ? x.at : null; });
-    var timedMap = titled > 1 && starts.every(function (t, i) { return t != null || !secs[i].title; });
+    var timedMap = starts.filter(function (t, i) { return t != null && secs[i].title; }).length > 1;
     var lastT = Math.max.apply(null, starts.filter(function (t) { return t != null; }).concat([0]));
     function short(t) { return t.replace(/^verse\s*/i, "V").replace(/^pre-?chorus$/i, "Pre").replace(/^final chorus$/i, "Final").replace(/^scene\s*(\d+).*/i, "S$1").replace(/^opening scene.*/i, "Opening").replace(/^the final message$/i, "End").replace(/^rising action$/i, "Rising").replace(/^falling action$/i, "Falling"); }
     if (timedMap) var map = '<div class="tv-map" role="group" aria-label="Parts: tap one to go there">' + secs.map(function (s, i) {
-      if (!s.title) return "";
+      if (!s.title || starts[i] == null) return "";
       var nx = starts.slice(i + 1).filter(function (t) { return t != null; })[0], d = Math.max(3, (nx != null ? nx : lastT + 15) - starts[i]);
       return '<button type="button" class="seg' + (/chorus/i.test(s.title) && !/pre/i.test(s.title) ? " cho" : /pre/i.test(s.title) ? " pre" : "") + '" data-seg="' + i + '" data-t="' + starts[i] + '" style="flex-grow:' + Math.round(d) + '" title="' + esc(s.label) + " · " + clock(starts[i]) + '"><span>' + esc(short(s.title)) + '</span><i class="fill"></i></button>';
     }).join("") + "</div>";
@@ -857,31 +857,7 @@
     tv._lines.forEach(function (x, i) { x.wt = T[i]; var tx = $(".tx", x.el); if (x.wt && tx && !tx._words) wrapWords(tx); });
   }
 
-  /* golden glitter: the word being sung / read leaves a trail of sparkles */
-  var SPARK_N = reduce ? 0 : LITE ? 4 : 10, GOLD = ["#fff4c2", "#ffe08a", "#ffcf6e", "#f5b942", "#ffffff"];
-  function sparkle(tv, word, n) {
-    if (!SPARK_N || !word || !word.animate) return;
-    var fx = tv._fx;
-    if (!fx) { fx = tv._fx = document.createElement("div"); fx.className = "tv-fx"; fx.setAttribute("aria-hidden", "true"); tv.appendChild(fx); tv._pool = []; tv._pi = 0; }
-    var r = word.getBoundingClientRect(), b = tv.getBoundingClientRect(), body = $(".tv-body", tv).getBoundingClientRect();
-    if (r.bottom < body.top || r.top > body.bottom) return;
-    for (var i = 0; i < (n || SPARK_N); i++) {
-      var el = tv._pool[tv._pi];
-      if (!el) { el = document.createElement("i"); fx.appendChild(el); tv._pool[tv._pi] = el; }
-      tv._pi = (tv._pi + 1) % (LITE ? 40 : 110);
-      var star = Math.random() < .3, size = star ? 10 + Math.random() * 12 : 2.5 + Math.random() * 4.5;
-      el.className = star ? "spk star" : "spk";
-      el.style.width = el.style.height = size + "px";
-      el.style.setProperty("--g", GOLD[(Math.random() * GOLD.length) | 0]);
-      var x = r.left - b.left - 4 + Math.random() * (r.width + 8), y = r.top - b.top + r.height * (Math.random() < .62 ? .82 + Math.random() * .35 : -.12 + Math.random() * .2);
-      var dx = (Math.random() - .25) * 46, dy = (Math.random() - .6) * 40;
-      el.animate([
-        { transform: "translate(" + x + "px," + y + "px) scale(.2) rotate(0deg)", opacity: 0 },
-        { transform: "translate(" + (x + dx * .3) + "px," + (y + dy * .3) + "px) scale(1) rotate(45deg)", opacity: 1, offset: .2 },
-        { transform: "translate(" + (x + dx) + "px," + (y + dy) + "px) scale(.1) rotate(120deg)", opacity: 0 }
-      ], { duration: 900 + Math.random() * 1300, easing: "cubic-bezier(.2,.7,.3,1)", fill: "forwards" });
-    }
-  }
+  var GOLD = ["#fff4c2", "#ffe08a", "#ffcf6e", "#f5b942", "#ffffff"];
 
   // the map: parts already played, the part playing now (filling up) and the ones to come
   function mapFollow(tv, now) {
@@ -905,12 +881,10 @@
     var cur = k >= 0 && L[k].wt, tx = cur && $(".tx", L[k].el);
     if (tx && tx._words) {
       var wi = -1; for (var j = 0; j < cur.length; j++) if (cur[j] <= now + .08) wi = j;
-      var playing = tv._player && tv._player.getPlayerState && tv._player.getPlayerState() === 1;
       if (wi !== tv._wi || k !== tv._k) {
         tv._wi = wi;
         tx._words.forEach(function (sp) { var d = +sp.getAttribute("data-i"); sp.classList.toggle("sung", d < wi); sp.classList.toggle("cur", d === wi); });
-        if (playing && wi >= 0) sparkle(tv, $('.w.cur', tx));
-      } else if (playing && wi >= 0) sparkle(tv, $('.w.cur', tx), Math.ceil(SPARK_N / 2));
+      }
     }
     if (k === tv._k) return;
     if (tv._k >= 0 && L[tv._k]) { var old = $(".tx", L[tv._k].el); if (old && old._words) old._words.forEach(function (sp) { sp.classList.remove("cur"); sp.classList.add("sung"); }); }
@@ -1047,6 +1021,51 @@
     var vw = e.target.closest && e.target.closest(".vw");
     if (vw && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); showWord(vw); }
   });
+
+
+  /* cursor: a soft golden halo that follows the pointer, a light trail of sparkles and a tiny burst on click */
+  (function () {
+    if (!matchMedia("(pointer: fine)").matches || reduce || !document.body.animate) return;
+    var layer = document.createElement("div"), halo = document.createElement("div");
+    layer.className = "cur-fx"; halo.className = "cur-halo";
+    layer.setAttribute("aria-hidden", "true"); halo.setAttribute("aria-hidden", "true");
+    document.body.appendChild(layer); document.body.appendChild(halo);
+    var pool = [], pi = 0, MAX = LITE ? 16 : 36, last = 0, lx = -99, ly = -99, on = false;
+    var hx = G ? G.quickTo(halo, "x", { duration: .35, ease: "power3" }) : null, hy = G ? G.quickTo(halo, "y", { duration: .35, ease: "power3" }) : null;
+    function spark(x, y, burst) {
+      var el = pool[pi];
+      if (!el) { el = document.createElement("i"); layer.appendChild(el); pool[pi] = el; }
+      pi = (pi + 1) % MAX;
+      var star = burst ? Math.random() < .5 : Math.random() < .3, size = star ? 8 + Math.random() * 8 : 3 + Math.random() * 3;
+      el.className = star ? "spk star cur-s" : "spk cur-s";
+      el.style.width = el.style.height = size + "px";
+      el.style.setProperty("--g", GOLD[(Math.random() * GOLD.length) | 0]);
+      var ang = Math.random() * Math.PI * 2, dist = burst ? 18 + Math.random() * 26 : 6 + Math.random() * 12;
+      var dx = Math.cos(ang) * dist, dy = Math.sin(ang) * dist + (burst ? 0 : 10);
+      el.animate([
+        { transform: "translate(" + x + "px," + y + "px) scale(.3)", opacity: 0 },
+        { transform: "translate(" + (x + dx * .35) + "px," + (y + dy * .35) + "px) scale(1)", opacity: .95, offset: .2 },
+        { transform: "translate(" + (x + dx) + "px," + (y + dy) + "px) scale(0) rotate(90deg)", opacity: 0 }
+      ], { duration: burst ? 650 + Math.random() * 450 : 800 + Math.random() * 600, easing: "cubic-bezier(.2,.7,.3,1)", fill: "forwards" });
+    }
+    function show(v) { if (v !== on) { on = v; halo.classList.toggle("on", v); } }
+    addEventListener("mousemove", function (e) {
+      var x = e.clientX, y = e.clientY;
+      if (!on) { if (G) G.set(halo, { x: x, y: y }); show(true); }
+      if (hx) { hx(x); hy(y); } else halo.style.transform = "translate(" + x + "px," + y + "px)";
+      var t = performance.now();
+      if (t - last > (LITE ? 90 : 38) && Math.abs(x - lx) + Math.abs(y - ly) > 10) { last = t; lx = x; ly = y; spark(x, y); }
+    }, { passive: true });
+    document.addEventListener("mouseover", function (e) {
+      var tg = e.target;
+      if (tg.tagName === "IFRAME") { show(false); return; }
+      halo.classList.toggle("link", !!(tg.closest && tg.closest("a, button, [role=button], label, input, .seg, .timed, .vw, .fan-card")));
+    });
+    document.documentElement.addEventListener("mouseleave", function () { show(false); });
+    addEventListener("blur", function () { show(false); });
+    addEventListener("mousedown", function (e) { halo.classList.add("press"); for (var i = 0; i < (LITE ? 4 : 8); i++) spark(e.clientX, e.clientY, true); });
+    addEventListener("mouseup", function () { halo.classList.remove("press"); });
+  })();
 
   /* menu */
   var menuBtn = $("#menu-btn"), links = $("#links");

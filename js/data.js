@@ -164,7 +164,7 @@ window.SITE = {
       portadaFoco: "50% 50%",
       tema: { bg: "#f7f0e2", bg2: "#efe2f7", ink: "#2f2640", accent: "#8a5cc9", accent2: "#e9a521", oscuro: false },
       resumen: "Three flowers host a podcast where every flower hides a real story. In this episode: a game of Charlie Charlie in the oldest bathroom of a Colombian school.",
-      media: { url: "", boton: "" },
+      media: { url: "https://youtu.be/_pHUU1dGhuM", boton: "" },
       transcripcion: `## Characters
 STORMY: Purple gerbera – curious and optimistic.
 ROSALY: Sunflower – sensitive and adventurous.
@@ -172,64 +172,64 @@ SKYLER: Daisy – brave and shy.
 
 ## Scene 1 · Introduction
 [VISUAL: The three animated flowers appear. Friendly, mysterious intro music.]
-STORMY: Hello, everyone! Welcome to Behind the Petals, the podcast where every flower hides a real, anonymous story. I'm Stormy, the purple gerbera, and today I'm your host. With me are Rosaly and Skyler.
-ROSALY: Hi, everybody!
-SKYLER: Hello! Hahaha, sorry, I'm a little nervous.
-STORMY: Don't worry, Skyler! Each of us represents a real person, and every person has a story to share. Today, we're talking about scary stories at school. Every school has one, like a ghost in the library or an old building. In Colombia, we all know at least one!
-STORMY: Today's story happened at a real school, I.E. Manganito Martínez de la Patagonia. It's about a famous game: Charlie Charlie. I'm going to stay quiet and listen. I'm already scared! Rosaly and Skyler, please begin!
+[0:09.1] STORMY: Hello, everyone! Welcome to Behind the Petals, the podcast where every flower hides a real, anonymous story. I'm Stormy, the purple gerbera, and today I'm your host. With me are Rosaly and Skyler.
+[0:25.7] ROSALY: Hi, everybody!
+[0:28.1] SKYLER: Hello! Hahaha, sorry, I'm a little nervous.
+[0:31.8] STORMY: Don't worry, Skyler! Each of us represents a real person, and every person has a story to share. Today, we're talking about scary stories at school. Every school has one, like a ghost in the library or an old building. In Colombia, we all know at least one!
+[0:54.1] STORMY: Today's story happened at a real school, I.E. Manganito Martínez de la Patagonia. It's about a famous game: Charlie Charlie. I'm going to stay quiet and listen. I'm already scared! Rosaly and Skyler, please begin!
 
 ## Scene 2 · The Beginning
 [VISUAL: An old school corridor and a dark bathroom. Sound: cold wind, a blinking light and distant school noises. Suspense music begins softly.]
-ROSALY: It was a normal day at I.E. Manganito Martínez de la Patagonia. We were in tenth grade, and during recess, a friend said, "Let's play Charlie Charlie!" At first, nobody wanted to, but then everybody agreed. We didn't want to play in the classroom because a teacher was there, so we went to the oldest bathroom at the back of the school.
-ROSALY: The corridor was dark, and the air was very cold. The sinks were dirty, the light was blinking, and the mirror was broken. We put two pencils on a piece of paper and asked, "Charlie, Charlie, are you here?" We laughed, but it was a nervous laugh.
+[1:21.5] ROSALY: It was a normal day at I.E. Manganito Martínez de la Patagonia. We were in tenth grade, and during recess, a friend said, "Let's play Charlie Charlie!" At first, nobody wanted to, but then everybody agreed. We didn't want to play in the classroom because a teacher was there, so we went to the oldest bathroom at the back of the school.
+[1:46.7] ROSALY: The corridor was dark, and the air was very cold. The sinks were dirty, the light was blinking, and the mirror was broken. We put two pencils on a piece of paper and asked, "Charlie, Charlie, are you here?" We laughed, but it was a nervous laugh.
 [SOUND: Pencils moving softly.]
-ROSALY: And the pencils moved a little. Skyler, do you remember what happened next?
+[2:09.5] ROSALY: And the pencils moved a little. Skyler, do you remember what happened next?
 
 ## Scene 3 · The Strange Reflections
-SKYLER: Yes, I remember. Suddenly, we heard a sound: knock, knock, knock.
+[2:16.0] SKYLER: Yes, I remember. Suddenly, we heard a sound: knock, knock, knock.
 [SOUND: Three slow knocks.]
-SKYLER: It came from inside one of the stalls. We looked at each other, and nobody said anything. Someone said, "Maybe it was the wind." But there was no window!
-SKYLER: Then, we looked at the mirror. It had dark stains, and our faces looked very strange. One girl looked at her reflection and said, "That's not my face!" We looked again, and our reflections were behaving differently. One reflection smiled, but the girl wasn't smiling. Another one moved her hand, but my friend didn't move hers. One reflection turned her head toward the door, as if she was waiting for something.
-SKYLER: I wanted to leave, but my legs wouldn't move. Rosaly, your friend had a flashlight, right?
+[2:23.1] SKYLER: It came from inside one of the stalls. We looked at each other, and nobody said anything. Someone said, "Maybe it was the wind." But there was no window!
+[2:38.5] SKYLER: Then, we looked at the mirror. It had dark stains, and our faces looked very strange. One girl looked at her reflection and said, "That's not my face!" We looked again, and our reflections were behaving differently. One reflection smiled, but the girl wasn't smiling. Another one moved her hand, but my friend didn't move hers. One reflection turned her head toward the door, as if she was waiting for something.
+[3:07.0] SKYLER: I wanted to leave, but my legs wouldn't move. Rosaly, your friend had a flashlight, right?
 
 ## Scene 4 · The Climax
-ROSALY: Yes, she did. She turned on her flashlight to see better. Then, she turned it off, but the mirror stayed lit. There was no light source at all.
+[3:14.2] ROSALY: Yes, she did. She turned on her flashlight to see better. Then, she turned it off, but the mirror stayed lit. There was no light source at all.
 [SOUND: Low electric hum.]
-ROSALY: Then, one reflection came closer to the glass and whispered something. I didn't understand the words, but I felt it on my skin.
-ROSALY: Skyler, tell them how we tried to escape!
+[3:28.3] ROSALY: Then, one reflection came closer to the glass and whispered something. I didn't understand the words, but I felt it on my skin.
+[3:40.8] ROSALY: Skyler, tell them how we tried to escape!
 
 ## Scene 5 · The Escape
 [VISUAL: The students rush to the bathroom door.]
-SKYLER: We ran to the door, but we couldn't open it. It was stuck! We pulled and pulled, but it wouldn't move. Nobody spoke. We only heard our breathing.
+[3:45.5] SKYLER: We ran to the door, but we couldn't open it. It was stuck! We pulled and pulled, but it wouldn't move. Nobody spoke. We only heard our breathing.
 [SOUND: Door handle rattling and heavy breathing.]
-SKYLER: The light blinked more and more, and then I heard another whisper, right behind my ear. I still don't know if it was a person or something else. Finally, the door opened, and we ran out screaming!
+[3:58.9] SKYLER: The light blinked more and more, and then I heard another whisper, right behind my ear. I still don't know if it was a person or something else. Finally, the door opened, and we ran out screaming!
 [SOUND: Door opens, screams and running footsteps.]
-SKYLER: We ran down the corridor to a teacher, crying and shaking, and told her everything.
+[4:15.0] SKYLER: We ran down the corridor to a teacher, crying and shaking, and told her everything.
 
 ## Scene 6 · The End
-ROSALY: The teacher went to the bathroom, but nothing strange was there. Everything looked normal, and the mirror was broken as always.
-ROSALY: Then, the teachers took us to the principal's office because of all the noise. The principal said it was probably academic stress or maybe a joke. We said it was real, but nobody believed us. We never knew what had happened, and we promised never to play again.
+[4:24.4] ROSALY: The teacher went to the bathroom, but nothing strange was there. Everything looked normal, and the mirror was broken as always.
+[4:34.0] ROSALY: Then, the teachers took us to the principal's office because of all the noise. The principal said it was probably academic stress or maybe a joke. We said it was real, but nobody believed us. We never knew what had happened, and we promised never to play again.
 
 ## Scene 7 · Final Discussion
 [VISUAL: The three flowers appear together. Soft background music.]
-STORMY: Wow! That was... wow! I don't know what to say! Hahaha. Okay, I have two questions. Why that bathroom, Rosaly?
-ROSALY: Because it was the scariest one! We wanted the real experience. Bad idea, hahaha!
-STORMY: And Skyler, was it really real, or was it just stress, like the principal said?
-SKYLER: Hmm, I don't know. For me, it was real because we all saw the mirror at the same time. And now, when I walk past that bathroom, I don't look at the mirror.
-STORMY: Maybe the teacher didn't see anything because the ghost was shy, just like you, Skyler!
-SKYLER: Stormy, not funny!
-STORMY: Hahaha, sorry! But seriously, I think these stories are not just silly. In Colombian schools, students always tell stories like this: a ghost in the bathroom, strange noises at night, or games that are not allowed. Some are invented, some are real, and nobody knows which ones are true.
-ROSALY: That's true. We share them at recess, change a few details, and the story grows and grows.
-SKYLER: And that connects us. When we tell these stories, we remember our friends, our school, and the fear we felt together. They are part of our student culture and keep our school legends alive.
+[4:59.0] STORMY: Wow! That was... wow! I don't know what to say! Hahaha. Okay, I have two questions. Why that bathroom, Rosaly?
+[5:12.4] ROSALY: Because it was the scariest one! We wanted the real experience. Bad idea, hahaha!
+[5:20.1] STORMY: And Skyler, was it really real, or was it just stress, like the principal said?
+[5:27.4] SKYLER: Hmm, I don't know. For me, it was real because we all saw the mirror at the same time. And now, when I walk past that bathroom, I don't look at the mirror.
+[5:37.8] STORMY: Maybe the teacher didn't see anything because the ghost was shy, just like you, Skyler!
+[5:43.3] SKYLER: Stormy, not funny!
+[5:46.8] STORMY: Hahaha, sorry! But seriously, I think these stories are not just silly. In Colombian schools, students always tell stories like this: a ghost in the bathroom, strange noises at night, or games that are not allowed. Some are invented, some are real, and nobody knows which ones are true.
+[6:13.6] ROSALY: That's true. We share them at recess, change a few details, and the story grows and grows.
+[6:21.1] SKYLER: And that connects us. When we tell these stories, we remember our friends, our school, and the fear we felt together. They are part of our student culture and keep our school legends alive.
 
 ## Scene 8 · Closing
 [VISUAL: The three flowers face the camera. Friendly closing music.]
-STORMY: Now we want to ask you, flower friends: Have you ever experienced something like this at your school? A game, a strange noise, or a legend? Tell us in the comments, because every person has a story, and here we are listening!
-ROSALY: Thank you for listening to Behind the Petals.
-STORMY: Every flower hides a story...
-ROSALY: ...and every story...
-SKYLER: ...holds a secret.
-ALL THREE: Shhhhh!
+[6:39.0] STORMY: Now we want to ask you, flower friends: Have you ever experienced something like this at your school? A game, a strange noise, or a legend? Tell us in the comments, because every person has a story, and here we are listening!
+[6:59.3] ROSALY: Thank you for listening to Behind the Petals.
+[7:03.6] STORMY: Every flower hides a story...
+[7:06.5] ROSALY: ...and every story...
+[7:08.2] SKYLER: ...holds a secret.
+[7:09.5] ALL THREE: Shhhhh!
 [SOUND: Music fades out. The screen transitions to the podcast logo.]`,
       reflexion: ["Have you ever experienced something like this at your school? A game, a strange noise, or a legend? Every person has a story, and here we are listening!"],
       enfoque: {
