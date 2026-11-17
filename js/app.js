@@ -173,19 +173,23 @@
   }
 
   var TEAM_COLORS = [["#ffad80", "#ff8fa8"], ["#a586ff", "#8fc2ff"], ["#ffcf6e", "#ffad80"], ["#7fd6a8", "#8fc2ff"]];
+  // magazine rows: big photo on one side, the whole presentation on the other (sides alternate)
   function team() {
     var t = D.equipo || {}, people = arr(t.personas).filter(Boolean);
     if (!people.length) return "";
     return '<section class="band team-band" id="team"><div class="wrap"><div class="head"><span class="kicker">The team</span><h2 class="title-xl" data-split>' +
       esc(t.titulo || "Meet the Teachers") + '</h2></div><div class="team">' +
       people.map(function (p, i) {
-        var bio = arr(p.bio), c = TEAM_COLORS[i % TEAM_COLORS.length], foto = String(p.foto || "");
-        return '<article class="polaroid" data-pop><div class="ph-frame' + (foto ? " has-photo" : "") + '" style="--c1:' + c[0] + ";--c2:" + c[1] + '">' +
-          (foto ? '<img src="' + esc(foto) + '" alt="' + esc(p.nombre) + '" loading="lazy" decoding="async">' : "<span>" + esc(initials(p.nombre)) + "</span>") + "</div>" +
-          "<h3>" + esc(p.nombre) + "</h3>" + (p.rol ? '<p class="role">' + esc(p.rol) + "</p>" : "") +
-          (bio[0] ? '<p class="bio">' + esc(bio[0]) + "</p>" : "") +
-          (bio.length > 1 ? '<details class="more"><summary>Read more</summary>' + bio.slice(1).map(function (x) { return '<p class="bio">' + esc(x) + "</p>"; }).join("") + "</details>" : "") +
-          "</article>";
+        var bio = arr(p.bio).filter(Boolean), c = TEAM_COLORS[i % TEAM_COLORS.length], foto = String(p.foto || "");
+        var first = String(p.nombre || "").trim().split(/\s+/)[0];
+        return '<article class="member' + (i % 2 ? " flip" : "") + '" style="--c1:' + c[0] + ";--c2:" + c[1] + '">' +
+          '<div class="member-photo" data-pop><div class="polaroid"><div class="ph-frame' + (foto ? " has-photo" : "") + '">' +
+          (foto ? '<img src="' + esc(foto) + '" alt="' + esc(p.nombre) + '" loading="lazy" decoding="async">' : "<span>" + esc(initials(p.nombre)) + "</span>") +
+          '</div><span class="sig">' + esc(first) + "</span></div></div>" +
+          '<div class="member-text" data-reveal><span class="member-num">' + pad(i + 1) + " · Teacher</span><h3>" + esc(p.nombre) + "</h3>" +
+          (p.rol ? '<p class="role">' + esc(p.rol) + "</p>" : "") +
+          (p.cita ? '<blockquote class="pull">' + esc(p.cita) + "</blockquote>" : "") +
+          bio.map(function (x) { return '<p class="bio">' + esc(x) + "</p>"; }).join("") + "</div></article>";
       }).join("") + "</div></div></section>";
   }
 
@@ -251,6 +255,94 @@
     return out;
   }
 
+  /* ---------- transcripts: plain text with tiny markers -> an interactive reader ---------- */
+  var WHO_COLORS = ["#c9a7ff", "#ffcf6e", "#7fd6a8", "#ff9fb5", "#8fc2ff", "#ffad80"];
+  function rx(s) { return String(s).replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); }
+  function parseScript(txt) {
+    var secs = [], cur = null;
+    function sec(title) { cur = { title: title, items: [] }; secs.push(cur); }
+    String(txt || "").split(/\r?\n/).forEach(function (raw) {
+      var l = raw.trim(), m;
+      if (!l) return;
+      if (/^##/.test(l)) { sec(l.replace(/^##\s*/, "")); return; }
+      if (!cur) sec("");
+      if (/^>/.test(l)) cur.items.push({ k: "call", t: l.replace(/^>\s*/, "") });
+      else if ((m = l.match(/^\[(SOUND|VISUAL|MUSIC)\s*:\s*(.*?)\]?$/i))) cur.items.push({ k: "cue", c: m[1].toLowerCase(), t: m[2] });
+      else if ((m = l.match(/^([A-Z][A-Z .'-]{1,24}):\s*(.*)$/))) cur.items.push({ k: "say", who: m[1].trim(), t: m[2] });
+      else cur.items.push({ k: "line", t: l });
+    });
+    return secs.filter(function (s) { return s.items.length; });
+  }
+  function vocabOf(h) {
+    if (h._V !== undefined) return h._V;
+    var w = h.vocabulario.filter(function (v) { return v && v.palabra; }), map = {};
+    w.forEach(function (v) { map[v.palabra.toLowerCase()] = v.significado; });
+    h._V = w.length ? { re: new RegExp("\\b(" + w.map(function (v) { return rx(v.palabra); }).join("|") + ")\\b", "gi"), map: map } : null;
+    return h._V;
+  }
+  function fmt(t, V, q) {
+    var s = esc(t);
+    if (V) s = s.replace(V.re, function (m) { return '<span class="vw" tabindex="0" data-m="' + esc(V.map[m.toLowerCase()] || "") + '">' + m + "</span>"; });
+    if (q) s = s.replace(new RegExp("(<[^>]+>)|(" + rx(esc(q)) + ")", "gi"), function (m, tag, hit) { return tag || '<mark class="hit">' + hit + "</mark>"; });
+    return s;
+  }
+  function isSong(h) { return /song|music/.test(slug(h.formato)); }
+  function scriptLabel(h) { var f = slug(h.formato); return /song|music/.test(f) ? "Lyrics" : /fairy|tale/.test(f) ? "Story" : "Script"; }
+  function storyById(id) { return D.historias.filter(function (x) { return x.id === id; })[0]; }
+  function viewer(h) {
+    var secs = parseScript(h.transcripcion), V = vocabOf(h), whos = {}, wi = 0;
+    if (!secs.length) return '<p class="soon-txt">The ' + scriptLabel(h).toLowerCase() + " will appear here soon.</p>";
+    var titled = secs.filter(function (s) { return s.title; }).length;
+    var nav = titled > 1 ? '<nav class="tv-nav" aria-label="Parts">' + secs.map(function (s, i) { return s.title ? '<button type="button" data-go="' + i + '">' + esc(s.title) + "</button>" : ""; }).join("") + "</nav>" : "";
+    function tx(t) { return '<span class="tx" data-raw="' + esc(t) + '">' + fmt(t, V) + "</span>"; }
+    var body = secs.map(function (s, i) {
+      return '<section class="tv-sec' + (/chorus/i.test(s.title) ? " chorus" : "") + '" data-sec="' + i + '">' + (s.title ? "<h5>" + esc(s.title) + "</h5>" : "") +
+        s.items.map(function (it) {
+          if (it.k === "say") {
+            if (!whos[it.who]) whos[it.who] = WHO_COLORS[wi++ % WHO_COLORS.length];
+            return '<p class="tv-say" style="--who:' + whos[it.who] + '"><b class="who">' + esc(cap(it.who.toLowerCase())) + "</b>" + tx(it.t) + "</p>";
+          }
+          if (it.k === "cue") return '<p class="tv-cue"><i aria-hidden="true">' + (it.c === "sound" ? "🔊" : it.c === "music" ? "🎵" : "🎬") + "</i>" + tx(it.t) + "</p>";
+          if (it.k === "call") return '<blockquote class="tv-call">' + tx(it.t) + "</blockquote>";
+          return '<p class="tv-line">' + tx(it.t) + "</p>";
+        }).join("") + "</section>";
+    }).join("");
+    return '<div class="tv' + (isSong(h) ? " song" : "") + '" data-tv="' + h.id + '">' +
+      '<div class="tv-tools"><label class="tv-search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.2-4.2"/></svg>' +
+      '<input type="search" placeholder="Find a word…" aria-label="Find a word in the ' + scriptLabel(h).toLowerCase() + '"></label><span class="tv-count" aria-live="polite"></span>' +
+      '<button type="button" class="tv-size" aria-pressed="false" title="Bigger text" aria-label="Bigger text">A<span>A</span></button></div>' +
+      nav + '<div class="tv-body" tabindex="0" aria-label="' + esc(scriptLabel(h)) + '">' + body + "</div>" +
+      (V ? '<p class="tv-hint"><span class="vw-demo">Wavy words</span> are key words: touch one to see what it means.</p>' : "") + "</div>";
+  }
+
+  // the story kit next to the video: before / lyrics-script-story / after
+  function kit(h) {
+    var f = h.enfoque, words = h.vocabulario.filter(function (v) { return v && v.palabra; }), lab = scriptLabel(h);
+    var verb = /song|podcast|audio/.test(slug(h.formato)) ? "listen" : "watch";
+    var before = '<div class="kit-panel" data-panel="before" role="tabpanel">' + chips("Grammar focus", f.gramatica) + chips("Vocabulary focus", f.vocabulario, true) +
+      (words.length ? '<div class="focus"><h4>Key words · flip them!</h4></div><div class="mini-words">' + words.slice(0, 3).map(function (v) { return flash(v, h, true); }).join("") + "</div>" : "") +
+      '<p class="kit-tip">Look out for ' + (words.length ? "these words" : "new words") + " while you " + verb + "!</p></div>";
+    var refl = arr(h.reflexion).filter(Boolean);
+    var after = '<div class="kit-panel" data-panel="after" role="tabpanel" hidden>' +
+      (refl.length ? '<div class="focus"><h4>Think about it</h4></div>' + refl.map(function (r) { return '<blockquote class="tv-call">' + esc(r) + "</blockquote>"; }).join("") : "") +
+      (h.actividades.length ? '<div class="focus"><h4>Now practice</h4></div><div class="plist">' + h.actividades.map(function (a) {
+        var sk = skillOf(a.habilidad);
+        return '<a class="pl s-' + sk.cls + (done[a.id] ? " is-done" : "") + '" href="#act-' + esc(a.id) + '" data-ix="' + esc(a.id) + '"><span class="pl-ic">' + icon(sk.cls) + "</span><span><small>" + esc(sk.label) + "</small>" + esc(a.titulo || sk.label) + '</span><span class="tick" aria-hidden="true">✓</span></a>';
+      }).join("") + "</div>" : "") + "</div>";
+    var tabs = [["before", "Before"], ["text", lab], ["after", "After"]];
+    return '<aside class="kit glass" data-reveal><div class="kit-tabs" role="tablist" aria-label="' + esc(h.titulo) + '">' +
+      tabs.map(function (t, j) { return '<button type="button" role="tab" data-tab="' + t[0] + '" aria-selected="' + (j === 0) + '" tabindex="' + (j === 0 ? 0 : -1) + '"><i>' + (j + 1) + "</i>" + t[1] + "</button>"; }).join("") + "</div>" +
+      before + '<div class="kit-panel" data-panel="text" role="tabpanel" hidden>' + viewer(h) + "</div>" + after + "</aside>";
+  }
+  var EXPAND = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>';
+  function mediaBar(h, url, yt) {
+    var lab = scriptLabel(h).toLowerCase();
+    return '<div class="media-bar"><button type="button" class="mb mb-main" data-theater="' + h.id + '">' + EXPAND +
+      (url ? (isSong(h) ? "Watch & sing along" : "Watch & read along") : "Read the " + lab) + "</button>" +
+      (url ? '<button type="button" class="mb" data-open-text="' + h.id + '">' + scriptLabel(h) + "</button>" : "") +
+      (url ? '<a class="mb" href="' + esc(url) + '" target="_blank" rel="noopener">' + (yt ? "YouTube" : esc(platform(url))) + " ↗</a>" : "") + "</div>";
+  }
+
   function chapter(h, i) {
     var url = cleanUrl(h.media.url), yt = ytId(url), f = h.enfoque, light = h.tema && h.tema.oscuro === false;
     var play = url
@@ -258,10 +350,6 @@
         '<span class="play-ring"><svg viewBox="0 0 24 24"><path d="M7 4.5v15l12.5-7.5z" fill="currentColor"/></svg></span><span>' + esc(mediaVerb(h)) +
         "<small>" + (yt ? "Plays right here" : esc(platform(url)) + " · opens in a new tab") + "</small></span>" + (yt ? "</button>" : "</a>")
       : '<span class="soon-badge"><i></i>' + esc(cap(h.formato || "Media")) + " coming soon</span>";
-    var transcript = String(h.transcripcion || "").trim()
-      ? '<details class="transcript glass"><summary>' + (/song/.test(slug(h.formato)) ? "Lyrics" : "Transcript") + "</summary><div>" + esc(String(h.transcripcion).trim()) + "</div></details>" : "";
-    var words = h.vocabulario.filter(function (v) { return v && v.palabra; });
-    var mini = words.length ? '<div class="glass"><div class="focus"><h4>Key words · flip them!</h4></div><div class="mini-words">' + words.slice(0, 3).map(function (v) { return flash(v, h, true); }).join("") + "</div></div>" : "";
     var dn = h.actividades.filter(function (a) { return done[a.id]; }).length;
     var photos = h.galeria.filter(function (p) { return p && p.imagen; }).map(function (p, j) {
       return '<button type="button" class="ph" data-lb="' + esc(p.imagen) + '" data-cap="' + esc(p.pie || "") + '"><img src="' + esc(p.imagen) + '" alt="' + esc(p.pie || "") + '" loading="lazy">' + (p.pie ? "<span>" + esc(p.pie) + "</span>" : "") + "</button>";
@@ -271,10 +359,8 @@
       '<span class="ch-num" aria-hidden="true">' + pad(i + 1) + "</span>" +
       '<div class="wrap"><header class="ch-head"><span class="ch-kicker">Chapter ' + (i + 1) + ' · <span class="fmt-t">' + esc(h.formato || "Story") + "</span></span>" +
       '<h2 class="ch-title" data-split>' + esc(h.titulo) + "</h2>" + (h.resumen ? '<p class="ch-sum" data-reveal>' + esc(h.resumen) + "</p>" : "") + "</header>" +
-      '<div class="ch-grid"><div><div class="stage" data-stage><img class="stage-img" src="' + esc(h.portada) + '" alt="' + esc(h.titulo) + ' cover" loading="lazy" style="object-position:' + esc(h.portadaFoco || "50% 50%") + '">' + play + "</div>" +
-      (yt ? '<a class="yt-link" href="' + esc(url) + '" target="_blank" rel="noopener">Open on YouTube ↗</a>' : "") + "</div>" +
-      '<aside class="ch-notes"><div class="glass" data-reveal>' + chips("Grammar focus", f.gramatica) + chips("Vocabulary focus", f.vocabulario, true) + "</div>" +
-      (mini ? '<div data-reveal>' + mini.replace('<div class="glass">', '<div class="glass">') + "</div>" : "") + (transcript ? '<div data-reveal>' + transcript + "</div>" : "") + "</aside></div>" +
+      '<div class="ch-grid"><div class="ch-media"><div class="stage" data-stage><img class="stage-img" src="' + esc(h.portada) + '" alt="' + esc(h.titulo) + ' cover" loading="lazy" style="object-position:' + esc(h.portadaFoco || "50% 50%") + '">' + play + "</div>" +
+      mediaBar(h, url, yt) + "</div>" + kit(h) + "</div>" +
       (photos ? '<div class="practice"><div class="practice-head"><h3>Photos</h3></div><div class="gallery">' + photos + "</div></div>" : "") +
       (h.actividades.length ? '<div class="practice"><div class="practice-head"><h3>Practice <em>here!</em></h3>' +
         '<div class="ch-meter"><span data-ch-count="' + h.id + '">' + dn + " / " + h.actividades.length + '</span><div class="bar"><span data-ch-bar="' + h.id + '" style="width:' + Math.round(dn / h.actividades.length * 100) + "%;--b:var(--accent)\"></span></div></div></div>" +
@@ -466,6 +552,19 @@
     if (fl) { fl.setAttribute("aria-pressed", fl.getAttribute("aria-pressed") !== "true"); return; }
     var f = t.closest(".filter");
     if (f) { filterBy(f.getAttribute("data-group"), f.getAttribute("data-value")); return; }
+    var tb = t.closest("[data-tab]");
+    if (tb) { setTab(tb.closest(".kit"), tb.getAttribute("data-tab")); return; }
+    var go = t.closest("[data-go]");
+    if (go) { var tvg = go.closest(".tv"); scrollBody(tvg, $('[data-sec="' + go.getAttribute("data-go") + '"]', tvg)); return; }
+    var sz = t.closest(".tv-size");
+    if (sz) { var big = sz.getAttribute("aria-pressed") !== "true"; sz.setAttribute("aria-pressed", big); sz.closest(".tv").classList.toggle("big", big); return; }
+    var thb = t.closest("[data-theater]");
+    if (thb) { openTheater(thb.getAttribute("data-theater")); return; }
+    var ot = t.closest("[data-open-text]");
+    if (ot) { var kt = $(".kit", ot.closest(".chapter")); setTab(kt, "text"); kt.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "nearest" }); return; }
+    if (t.closest("[data-th-close]") || t.id === "theater") { closeTheater(); return; }
+    var vw = t.closest(".vw");
+    if (vw) { vw.focus(); return; }
     var y = t.closest("[data-yt]");
     if (y) { playVideo(y); return; }
     var fs = t.closest("[data-filter-story]");
@@ -482,10 +581,11 @@
     }
     if (t.closest("#links a")) closeMenu();
   });
-  document.addEventListener("keydown", function (e) { if (e.key === "Escape") { $("#lb").hidden = true; closeMenu(); } });
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape") { $("#lb").hidden = true; closeMenu(); closeTheater(); } });
 
   function playVideo(btn) {
     var stage = btn.closest(".stage"), id = btn.getAttribute("data-yt");
+    stage._btn = btn.outerHTML;
     var f = document.createElement("iframe");
     f.src = "https://www.youtube-nocookie.com/embed/" + id + "?autoplay=1&rel=0&modestbranding=1";
     f.title = "Video"; f.allow = "autoplay; encrypted-media; picture-in-picture; fullscreen"; f.allowFullscreen = true;
@@ -510,6 +610,94 @@
         onComplete: function () { ST.refresh(); } });
     }
   }
+
+  /* story kit tabs */
+  function setTab(kitEl, name, focus) {
+    $$("[data-tab]", kitEl).forEach(function (b) { var on = b.getAttribute("data-tab") === name; b.setAttribute("aria-selected", on); b.tabIndex = on ? 0 : -1; if (on && focus) b.focus(); });
+    $$("[data-panel]", kitEl).forEach(function (p) {
+      var on = p.getAttribute("data-panel") === name;
+      p.hidden = !on;
+      var bd = on && $(".tv-body", p);
+      if (bd && bd._upd) requestAnimationFrame(bd._upd);
+      if (on && ANIM) G.fromTo(p, { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: .35, ease: "power2.out", clearProps: "transform,opacity" });
+    });
+    // the page below moved: keep the scroll animations in place
+    if (ANIM && ST) { clearTimeout(setTab.t); setTab.t = setTimeout(function () { ST.refresh(); }, 60); }
+  }
+  document.addEventListener("keydown", function (e) {
+    var b = e.target.closest && e.target.closest("[data-tab]");
+    if (!b || (e.key !== "ArrowRight" && e.key !== "ArrowLeft")) return;
+    var all = $$("[data-tab]", b.parentNode), i = all.indexOf(b) + (e.key === "ArrowRight" ? 1 : -1);
+    setTab(b.closest(".kit"), all[(i + all.length) % all.length].getAttribute("data-tab"), true);
+  });
+
+  /* transcript reader: find a word, jump to a part, bigger text, follow the part you are reading */
+  function scrollBody(tv, el) {
+    var body = $(".tv-body", tv);
+    body.scrollTo({ top: el.getBoundingClientRect().top - body.getBoundingClientRect().top + body.scrollTop - 16, behavior: reduce ? "auto" : "smooth" });
+  }
+  document.addEventListener("input", function (e) {
+    var inp = e.target;
+    if (!inp.matches || !inp.matches(".tv-search input")) return;
+    var tv = inp.closest(".tv"), h = storyById(tv.getAttribute("data-tv")), V = vocabOf(h), q = inp.value.trim();
+    if (q.length < 2) q = "";
+    $$(".tx", tv).forEach(function (s) { s.innerHTML = fmt(s.getAttribute("data-raw"), V, q); });
+    var hits = $$("mark.hit", tv);
+    $(".tv-count", tv).textContent = q ? (hits.length ? hits.length + (hits.length === 1 ? " match" : " matches") : "No matches") : "";
+    if (hits[0]) scrollBody(tv, hits[0]);
+  });
+  function spy(tv) {
+    var body = $(".tv-body", tv), nav = $(".tv-nav", tv);
+    if (!body || !nav || body._spy) return;
+    body._spy = true;
+    var secs = $$(".tv-sec", body), btns = $$("[data-go]", nav), tick = false, last = -1;
+    function upd() {
+      tick = false;
+      var top = body.getBoundingClientRect().top + 40, cur = 0;
+      secs.forEach(function (s, i) { if (s.getBoundingClientRect().top <= top) cur = i; });
+      if (body.scrollTop + body.clientHeight >= body.scrollHeight - 4) cur = secs.length - 1;
+      if (cur === last) return;
+      last = cur;
+      btns.forEach(function (b) { var on = +b.getAttribute("data-go") === cur; b.setAttribute("aria-current", on); if (on) nav.scrollTo({ left: b.offsetLeft - 24, behavior: reduce ? "auto" : "smooth" }); });
+    }
+    body._upd = upd;
+    body.addEventListener("scroll", function () { if (!tick) { tick = true; requestAnimationFrame(upd); } }, { passive: true });
+    upd();
+  }
+
+  /* watch & read along: a cinema with the video and the transcript side by side */
+  var lastFocus = null;
+  function stopInline() {
+    $$(".stage.playing").forEach(function (st) {
+      var f = $("iframe", st); if (f) f.remove();
+      st.classList.remove("playing");
+      if (st._btn) st.insertAdjacentHTML("beforeend", st._btn);
+    });
+  }
+  function openTheater(id) {
+    var h = storyById(id); if (!h) return;
+    stopInline();
+    var url = cleanUrl(h.media.url), yt = ytId(url), th = $("#theater");
+    var screen = yt
+      ? '<iframe src="https://www.youtube-nocookie.com/embed/' + yt + '?autoplay=1&rel=0&modestbranding=1" title="' + esc(h.titulo) + '" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe>'
+      : '<img src="' + esc(h.portada) + '" alt="">' + (url ? '<a class="play-big" href="' + esc(url) + '" target="_blank" rel="noopener"><span class="play-ring"><svg viewBox="0 0 24 24"><path d="M7 4.5v15l12.5-7.5z" fill="currentColor"/></svg></span><span>' + esc(mediaVerb(h)) + "<small>" + esc(platform(url)) + " · opens in a new tab</small></span></a>"
+        : '<span class="soon-badge"><i></i>' + esc(cap(h.formato || "Media")) + " coming soon · read it below</span>");
+    th.setAttribute("style", theme(h));
+    th.innerHTML = '<div class="th-in"><header class="th-head"><span class="th-k">' + esc(h.formato || "Story") + "</span><strong>" + esc(h.titulo) + '</strong><button type="button" class="th-x" data-th-close aria-label="Close">×</button></header>' +
+      '<div class="th-grid' + (yt || url ? "" : " no-media") + '"><div class="th-screen">' + screen + '</div><div class="th-read">' + viewer(h) + "</div></div></div>";
+    lastFocus = document.activeElement;
+    th.hidden = false; document.body.classList.add("th-open");
+    $$(".tv", th).forEach(spy);
+    $(".th-x", th).focus();
+    if (ANIM) { G.fromTo(th, { opacity: 0 }, { opacity: 1, duration: .3 }); G.from($(".th-in", th), { y: 30, scale: .98, duration: .5, ease: "power3.out", clearProps: "transform" }); }
+  }
+  function closeTheater() {
+    var th = $("#theater");
+    if (!th || th.hidden) return;
+    th.hidden = true; th.innerHTML = ""; document.body.classList.remove("th-open");
+    if (lastFocus && lastFocus.focus) lastFocus.focus();
+  }
+  $$(".kit .tv").forEach(spy);
 
   /* menu */
   var menuBtn = $("#menu-btn"), links = $("#links");
