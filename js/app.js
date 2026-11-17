@@ -309,14 +309,14 @@
     if (h._V !== undefined) return h._V;
     var w = h.vocabulario.filter(function (v) { return v && v.palabra; }), map = {};
     var all = [];
-    w.forEach(function (v) { formsOf(v).forEach(function (f) { map[f.toLowerCase()] = v.palabra + " (" + (v.tipo || "word") + "): " + v.significado; all.push(f); }); });
+    w.forEach(function (v, i) { formsOf(v).forEach(function (f) { map[f.toLowerCase()] = i; all.push(f); }); });
     all.sort(function (a, b) { return b.length - a.length; });
     h._V = w.length ? { re: new RegExp("\\b(" + all.map(rx).join("|") + ")\\b", "gi"), map: map } : null;
     return h._V;
   }
   function fmt(t, V, q) {
     var s = esc(t);
-    if (V) s = s.replace(V.re, function (m) { return '<span class="vw" tabindex="0" data-m="' + esc(V.map[m.toLowerCase()] || "") + '">' + m + "</span>"; });
+    if (V) s = s.replace(V.re, function (m) { return '<span class="vw" role="button" tabindex="0" data-v="' + V.map[m.toLowerCase()] + '">' + m + "</span>"; });
     if (q) s = s.replace(new RegExp("(<[^>]+>)|(" + rx(esc(q)) + ")", "gi"), function (m, tag, hit) { return tag || '<mark class="hit">' + hit + "</mark>"; });
     return s;
   }
@@ -356,23 +356,31 @@
   function kit(h) {
     var f = h.enfoque, words = h.vocabulario.filter(function (v) { return v && v.palabra; }), lab = scriptLabel(h);
     var verb = /song|podcast|audio/.test(slug(h.formato)) ? "listen" : "watch";
-    var before = '<div class="kit-panel" data-panel="before" role="tabpanel">' + chips("Grammar focus", f.gramatica) + chips("Vocabulary focus", f.vocabulario, true) +
-      (words.length ? '<div class="focus"><h4>Key words · tap to hear them</h4></div><div class="kw-list">' + words.map(function (v) {
+    var before = '<div class="kit-panel" data-panel="before" role="tabpanel"><p class="kit-intro"><b>Before you ' + verb + ".</b> " + (words.length ? "Tap each word to hear it and see what it means." : "Look at what this story practices.") + "</p>" +
+      (words.length ? '<div class="kw-list">' + words.map(function (v) {
         return '<button type="button" class="kw" aria-expanded="false" data-say="' + esc(v.palabra) + '"><span class="kw-top"><b>' + esc(v.palabra) + "</b>" + (v.tipo ? "<i>" + esc(v.tipo) + "</i>" : "") + SAY + '</span><span class="kw-m">' + esc(v.significado) + "</span></button>";
       }).join("") + "</div>" : "") +
-      '<p class="kit-tip">Look out for ' + (words.length ? "these words" : "new words") + " while you " + verb + "!</p></div>";
+      '<div class="kit-focus">' + chips("Grammar", f.gramatica) + chips("Vocabulary", f.vocabulario, true) + "</div>" +
+      '<button type="button" class="kit-next" data-tab-go="text">Next: ' + (isSong(h) ? "sing along" : verb + " and read") + " →</button></div>";
     var refl = arr(h.reflexion).filter(Boolean);
-    var after = '<div class="kit-panel" data-panel="after" role="tabpanel" hidden>' +
+    var after = '<div class="kit-panel" data-panel="after" role="tabpanel" hidden><p class="kit-intro"><b>After the story.</b> Think about it, then practice with the activities.</p>' +
       (refl.length ? '<div class="focus"><h4>Think about it</h4></div>' + refl.map(function (r) { return '<blockquote class="tv-call">' + esc(r) + "</blockquote>"; }).join("") : "") +
       (h.actividades.length ? '<div class="focus"><h4>Now practice</h4></div><div class="plist">' + h.actividades.map(function (a) {
         var sk = skillOf(a.habilidad);
         return '<a class="pl s-' + sk.cls + (done[a.id] ? " is-done" : "") + '" href="#act-' + esc(a.id) + '" data-ix="' + esc(a.id) + '"><span class="pl-ic">' + icon(sk.cls) + "</span><span><small>" + esc(sk.label) + "</small>" + esc(a.titulo || sk.label) + '</span><span class="tick" aria-hidden="true">✓</span></a>';
       }).join("") + "</div>" : "") + "</div>";
-    var tabs = [["before", "Before"], ["text", lab], ["after", "After"]];
-    return '<aside class="kit glass" data-reveal><div class="kit-tabs" role="tablist" aria-label="' + esc(h.titulo) + '">' +
-      tabs.map(function (t, j) { return '<button type="button" role="tab" data-tab="' + t[0] + '" aria-selected="' + (j === 0) + '" tabindex="' + (j === 0 ? 0 : -1) + '"><i>' + (j + 1) + "</i>" + t[1] + "</button>"; }).join("") + "</div>" +
-      before + '<div class="kit-panel" data-panel="text" role="tabpanel" hidden>' + viewer(h) + "</div>" + after + "</aside>";
+    var song = isSong(h), sub = song ? "Sing along" : /podcast|audio/.test(slug(h.formato)) ? "Read the script" : /film|video|movie/.test(slug(h.formato)) ? "Follow the scenes" : "Read along";
+    var steps = [["before", "Before", "Key words", STEP_IC.before], ["text", "While", sub, STEP_IC.text], ["after", "After", "Think & practice", STEP_IC.after]];
+    return '<aside class="kit glass" data-reveal data-step="0"><div class="kit-steps" role="tablist" aria-label="' + esc(h.titulo) + ': before, while and after">' +
+      steps.map(function (t, j) { return '<button type="button" role="tab" data-tab="' + t[0] + '" aria-selected="' + (j === 0) + '" tabindex="' + (j === 0 ? 0 : -1) + '"><span class="st-ic">' + t[3] + '</span><span class="st-tx"><b>' + t[1] + "</b><small>" + t[2] + "</small></span></button>"; }).join("") + "</div>" +
+      before + '<div class="kit-panel" data-panel="text" role="tabpanel" hidden><p class="kit-intro"><b>While you ' + verb + ".</b> " + (song ? "Sing along: the words light up with the music." : "Read along with the " + lab.toLowerCase() + ".") + "</p>" + viewer(h) +
+      '<button type="button" class="kit-next" data-tab-go="after">Next: think &amp; practice →</button></div>' + after + "</aside>";
   }
+  var STEP_IC = {
+    before: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h11a3 3 0 0 1 3 3v12H7a3 3 0 0 1-3-3V5Zm0 12a3 3 0 0 1 3-3h11M8 9h6"/></svg>',
+    text: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M10 8.5v7l5.5-3.5z" fill="currentColor"/></svg>',
+    after: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a6 6 0 0 0-3.5 10.9V16h7v-2.1A6 6 0 0 0 12 3ZM9.5 19h5M10.5 21.5h3"/></svg>'
+  };
   var EXPAND = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>';
   function mediaBar(h, url, yt) {
     var lab = scriptLabel(h).toLowerCase();
@@ -606,6 +614,8 @@
     if (fl) { fl.setAttribute("aria-pressed", fl.getAttribute("aria-pressed") !== "true"); return; }
     var f = t.closest(".filter");
     if (f) { filterBy(f.getAttribute("data-group"), f.getAttribute("data-value")); return; }
+    var tg = t.closest("[data-tab-go]");
+    if (tg) { var kg = tg.closest(".kit"); setTab(kg, tg.getAttribute("data-tab-go")); goTo(kg); return; }
     var tb = t.closest("[data-tab]");
     if (tb) { setTab(tb.closest(".kit"), tb.getAttribute("data-tab")); return; }
     var go = t.closest("[data-go]");
@@ -618,7 +628,8 @@
     if (ot) { var kt = $(".kit", ot.closest(".chapter")); setTab(kt, "text"); goTo(kt); return; }
     if (t.closest("[data-th-close]") || t.id === "theater") { closeTheater(); return; }
     var vw = t.closest(".vw");
-    if (vw) { vw.focus(); speak(vw.textContent); return; }
+    if (vw) { showWord(vw); return; }
+    if (!t.closest("#wpop")) hideWord();
     var y = t.closest("[data-yt]");
     if (y) { playVideo(y); return; }
     var fs = t.closest("[data-filter-story]");
@@ -678,6 +689,7 @@
   }
   /* story kit tabs */
   function setTab(kitEl, name, focus) {
+    var order = ["before", "text", "after"]; kitEl.setAttribute("data-step", order.indexOf(name));
     $$("[data-tab]", kitEl).forEach(function (b) { var on = b.getAttribute("data-tab") === name; b.setAttribute("aria-selected", on); b.tabIndex = on ? 0 : -1; if (on && focus) b.focus(); });
     $$("[data-panel]", kitEl).forEach(function (p) {
       var on = p.getAttribute("data-panel") === name;
@@ -707,7 +719,8 @@
     if (!inp.matches || !inp.matches(".tv-search input")) return;
     var tv = inp.closest(".tv"), h = storyById(tv.getAttribute("data-tv")), V = vocabOf(h), q = inp.value.trim();
     if (q.length < 2) q = "";
-    $$(".tx", tv).forEach(function (s) { s.innerHTML = fmt(s.getAttribute("data-raw"), V, q); });
+    $$(".tx", tv).forEach(function (s) { s.innerHTML = fmt(s.getAttribute("data-raw"), V, q); if (s._words) wrapWords(s); });
+    tv._wi = -2;
     var hits = $$("mark.hit", tv);
     $(".tv-count", tv).textContent = q ? (hits.length ? hits.length + (hits.length === 1 ? " match" : " matches") : "No matches") : "";
     if (hits[0]) scrollBody(tv, hits[0]);
@@ -764,6 +777,7 @@
   function closeTheater() {
     var th = $("#theater");
     if (!th || th.hidden) return;
+    hideWord();
     th.hidden = true; th.innerHTML = ""; document.body.classList.remove("th-open");
     if (lastFocus && lastFocus.focus) lastFocus.focus();
   }
@@ -790,6 +804,7 @@
     if (!tv._lines.length) return;
     var body = $(".tv-body", tv);
     if (!body._touch) { body._touch = true; ["wheel", "touchmove", "keydown"].forEach(function (ev) { body.addEventListener(ev, function () { tv._hand = Date.now(); }, { passive: true }); }); }
+    karaoke(tv);
     loadYT(function () {
       if (!document.contains(iframe)) return;
       var pl = new window.YT.Player(iframe, { events: { onReady: function () { tv._player = pl; } } });
@@ -799,15 +814,44 @@
         var now = pl.getCurrentTime() || 0;
         if (now === last) return;
         last = now; follow(tv, now);
-      }, 250);
+      }, 120);
     });
+  }
+  // split a line into word spans (keeps the key-word underline); word i gets data-i
+  function wrapWords(tx) {
+    var walker = document.createTreeWalker(tx, NodeFilter.SHOW_TEXT), nodes = [], n, i = -1, glued = false;
+    while ((n = walker.nextNode())) nodes.push(n);
+    nodes.forEach(function (node) {
+      var frag = document.createDocumentFragment();
+      (node.nodeValue.match(/\S+|\s+/g) || []).forEach(function (piece, j) {
+        if (/^\s/.test(piece)) { frag.appendChild(document.createTextNode(piece)); glued = false; return; }
+        if (!(j === 0 && glued)) i++;
+        var sp = document.createElement("span"); sp.className = "w"; sp.setAttribute("data-i", i); sp.textContent = piece;
+        frag.appendChild(sp); glued = true;
+      });
+      node.parentNode.replaceChild(frag, node);
+    });
+    tx._words = $$(".w", tx);
+  }
+  function karaoke(tv) {
+    var T = (window.TIMING || {})[tv.getAttribute("data-tv")];
+    if (!T) return;
+    tv.classList.add("karaoke");
+    tv._lines.forEach(function (x, i) { x.wt = T[i]; var tx = $(".tx", x.el); if (x.wt && tx && !tx._words) wrapWords(tx); });
   }
   function follow(tv, now) {
     var L = tv._lines, k = -1;
     for (var i = 0; i < L.length; i++) if (L[i].t <= now + .15) k = i;
     if (!tv.classList.contains("syncing")) tv.classList.add("syncing");
+    // the word being sung / read in the current line
+    var cur = k >= 0 && L[k].wt, tx = cur && $(".tx", L[k].el);
+    if (tx && tx._words) {
+      var wi = -1; for (var j = 0; j < cur.length; j++) if (cur[j] <= now + .08) wi = j;
+      if (wi !== tv._wi || k !== tv._k) { tv._wi = wi; tx._words.forEach(function (sp) { var d = +sp.getAttribute("data-i"); sp.classList.toggle("sung", d < wi); sp.classList.toggle("cur", d === wi); }); }
+    }
     if (k === tv._k) return;
-    tv._k = k;
+    if (tv._k >= 0 && L[tv._k]) { var old = $(".tx", L[tv._k].el); if (old && old._words) old._words.forEach(function (sp) { sp.classList.remove("cur"); sp.classList.add("sung"); }); }
+    tv._k = k; tv._wi = -2;
     L.forEach(function (x, i) { x.el.classList.toggle("now", i === k); x.el.classList.toggle("past", i < k); });
     // keep the line in view, unless the reader is scrolling on their own
     if (k >= 0 && (!tv._hand || Date.now() - tv._hand > 4000)) {
@@ -892,6 +936,47 @@
   });
   wordsMeter();
   if ($("#vq")) quizNext();
+
+
+  /* key word card: opens next to the word, stays inside the screen */
+  var wpop = document.createElement("div");
+  wpop.id = "wpop"; wpop.className = "wpop"; wpop.hidden = true; wpop.setAttribute("role", "dialog"); wpop.setAttribute("aria-label", "Key word");
+  document.body.appendChild(wpop);
+  function showWord(el) {
+    var tv = el.closest(".tv"), h = tv && storyById(tv.getAttribute("data-tv")), v = h && h.vocabulario.filter(function (x) { return x && x.palabra; })[+el.getAttribute("data-v")];
+    if (!v) return;
+    if (wpop._for === el && !wpop.hidden) { hideWord(); return; }
+    wpop._for = el;
+    wpop.innerHTML = '<div class="wp-top"><b>' + esc(v.palabra) + "</b>" + (v.tipo ? "<i>" + esc(v.tipo) + "</i>" : "") +
+      '<button type="button" class="say" data-say="' + esc(v.palabra) + '" aria-label="Listen: ' + esc(v.palabra) + '">' + SAY + "</button></div><p>" + esc(v.significado) + '</p><span class="wp-arrow"></span>';
+    wpop.hidden = false;
+    placeWord();
+    speak(v.palabra);
+    if (ANIM) G.fromTo(wpop, { opacity: 0, y: wpop._below ? -6 : 6 }, { opacity: 1, y: 0, duration: .22, ease: "power2.out" });
+  }
+  function placeWord() {
+    var el = wpop._for;
+    if (!el || wpop.hidden) return;
+    var r = el.getClientRects()[0] || el.getBoundingClientRect(), W = Math.min(300, innerWidth - 24);
+    wpop.style.width = W + "px";
+    var hgt = wpop.offsetHeight, cx = r.left + r.width / 2;
+    var left = Math.max(12, Math.min(innerWidth - W - 12, cx - W / 2));
+    var below = r.top - hgt - 12 < 8;
+    wpop._below = below;
+    wpop.style.left = left + "px";
+    wpop.style.top = (below ? r.bottom + 10 : r.top - hgt - 10) + "px";
+    wpop.classList.toggle("below", below);
+    wpop.style.setProperty("--ax", Math.max(14, Math.min(W - 14, cx - left)) + "px");
+    if (r.bottom < 0 || r.top > innerHeight) hideWord();
+  }
+  function hideWord() { if (!wpop.hidden) { wpop.hidden = true; wpop._for = null; } }
+  addEventListener("scroll", function () { if (!wpop.hidden) placeWord(); }, { passive: true, capture: true });
+  addEventListener("resize", hideWord);
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape") hideWord();
+    var vw = e.target.closest && e.target.closest(".vw");
+    if (vw && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); showWord(vw); }
+  });
 
   /* menu */
   var menuBtn = $("#menu-btn"), links = $("#links");

@@ -357,45 +357,45 @@ ALL THREE: Shhhhh!
       resumen: "Lila is a shy little bud who cannot bloom in the sun. With the help of Chispa the firefly and the Moon, she discovers that everyone has their own time to bloom.",
       media: { url: "https://youtu.be/QnJggAAxj_4", boton: "" },
       transcripcion: `## Exposition
-Lila was a small purple bud with green leaves and closed petals. She lived in a quiet corner of a meadow, and she was very shy. Whenever someone looked at her, she tried to hide behind her leaves. Sometimes, she was not even sure that she was a real flower.
-One beautiful morning, the meadow smelled of wet grass and sweet honey. Bees buzzed among the flowers, and a soft wind moved through the tall grass. Sol, the happy sunflower, was already waving his yellow face toward the sky. Next to him, Rosalía, a red rose, was shining in the sunlight. Florentina, a vain orange butterfly, was flying from flower to flower, choosing only the flowers that were already open.
-All the flowers had bloomed, but Lila was still a little bud. Tall trees surrounded her, so only a little sunlight reached her. She looked at the colorful petals around her and then lowered her eyes to her own green leaves. She remained silent, feeling different from everyone else.
+[0:06.7] Lila was a small purple bud with green leaves and closed petals. She lived in a quiet corner of a meadow, and she was very shy. Whenever someone looked at her, she tried to hide behind her leaves. Sometimes, she was not even sure that she was a real flower.
+[0:22.9] One beautiful morning, the meadow smelled of wet grass and sweet honey. Bees buzzed among the flowers, and a soft wind moved through the tall grass. Sol, the happy sunflower, was already waving his yellow face toward the sky. Next to him, Rosalía, a red rose, was shining in the sunlight. Florentina, a vain orange butterfly, was flying from flower to flower, choosing only the flowers that were already open.
+[0:49.3] All the flowers had bloomed, but Lila was still a little bud. Tall trees surrounded her, so only a little sunlight reached her. She looked at the colorful petals around her and then lowered her eyes to her own green leaves. She remained silent, feeling different from everyone else.
 
 ## Rising Action
-“Good morning, Lila!” Sol said with a big smile.
-Lila moved a little but did not answer. She was too shy to speak.
-Then Rosalía turned toward her. “Still closed?” she asked proudly. “Poor Lila! Maybe you are not a flower that can bloom.”
-Florentina laughed and flew closer. “Why should I land on you? You don't even have any color!”
-Lila felt as if her heart were a tiny stone. Their words hurt her, and she wished she could disappear beneath the grass.
-Every day, the same thing happened. Lila tried to open her petals in the morning, but nothing changed. While the other flowers enjoyed the warm sunlight, she cried quietly. With each passing day, she felt smaller and less important. She began to believe that she would never be beautiful like the others.
-One night, while Lila was feeling especially sad, a little light appeared beside her. It was Chispa, a kind firefly who was awake when most of the meadow was sleeping.
-“Why are you crying?” Chispa asked gently.
-“I'm different,” Lila replied. “I don't have enough sunlight to bloom.”
-Chispa looked at her kindly. “Maybe you don't need the sun all the time. Look up!”
+[1:07.1] “Good morning, Lila!” Sol said with a big smile.
+[1:10.6] Lila moved a little but did not answer. She was too shy to speak.
+[1:15.3] Then Rosalía turned toward her. “Still closed?” she asked proudly. “Poor Lila! Maybe you are not a flower that can bloom.”
+[1:22.8] Florentina laughed and flew closer. “Why should I land on you? You don't even have any color!”
+[1:32.3] Lila felt as if her heart were a tiny stone. Their words hurt her, and she wished she could disappear beneath the grass.
+[1:40.5] Every day, the same thing happened. Lila tried to open her petals in the morning, but nothing changed. While the other flowers enjoyed the warm sunlight, she cried quietly. With each passing day, she felt smaller and less important. She began to believe that she would never be beautiful like the others.
+[1:58.8] One night, while Lila was feeling especially sad, a little light appeared beside her. It was Chispa, a kind firefly who was awake when most of the meadow was sleeping.
+[2:09.0] “Why are you crying?” Chispa asked gently.
+[2:12.5] “I'm different,” Lila replied. “I don't have enough sunlight to bloom.”
+[2:17.9] Chispa looked at her kindly. “Maybe you don't need the sun all the time. Look up!”
 
 ## Climax
-Lila slowly raised her head and looked at the sky. There, the Moon was shining peacefully above the meadow. Its silver light fell softly on the grass, making the whole place look like a dream.
-As Lila watched the Moon, she felt a warm light inside her. For the first time, she stopped comparing herself with the other flowers. She began to believe that perhaps being different was not something to be ashamed of.
-Slowly, one of her petals opened. Then another followed. Little by little, all her petals unfolded toward the silver light.
-Lila was finally blooming, but not in the way anyone had expected.
+[2:23.5] Lila slowly raised her head and looked at the sky. There, the Moon was shining peacefully above the meadow. Its silver light fell softly on the grass, making the whole place look like a dream.
+[2:35.0] As Lila watched the Moon, she felt a warm light inside her. For the first time, she stopped comparing herself with the other flowers. She began to believe that perhaps being different was not something to be ashamed of.
+[2:46.9] Slowly, one of her petals opened. Then another followed. Little by little, all her petals unfolded toward the silver light.
+[2:55.3] Lila was finally blooming, but not in the way anyone had expected.
 
 ## Falling Action
-When morning arrived, the whole meadow seemed quiet. Lila had become a beautiful, deep purple flower with delicate silver lines on her petals. Under the first rays of sunlight, the silver lines sparkled like tiny stars.
-A gardener was walking through the meadow when he noticed her. He stopped in surprise and looked at her carefully.
-“This is the most beautiful flower I have ever seen!” he said. “People would pay a lot of money for a flower like this.”
-Soon, people came from far away to see Lila. Everyone admired her unusual beauty, and she became the most expensive flower in the meadow.
-Rosalía and Florentina watched from a distance. They felt jealous because people were no longer paying attention to them. However, they also began to understand that they had treated Lila unfairly.
-That night, they approached her.
-“We are sorry,” Rosalía said. “We were wrong about you.”
-“You were not late,” Florentina added quietly. “You were just different.”
-Lila looked at them and smiled. She was happy that they had apologized, but she also understood something important: she did not need everyone to admire her to know that she had value.
-“I know,” she replied. “I just needed my own time.”
+[2:59.3] When morning arrived, the whole meadow seemed quiet. Lila had become a beautiful, deep purple flower with delicate silver lines on her petals. Under the first rays of sunlight, the silver lines sparkled like tiny stars.
+[3:13.3] A gardener was walking through the meadow when he noticed her. He stopped in surprise and looked at her carefully.
+[3:18.6] “This is the most beautiful flower I have ever seen!” he said. “People would pay a lot of money for a flower like this.”
+[3:28.8] Soon, people came from far away to see Lila. Everyone admired her unusual beauty, and she became the most expensive flower in the meadow.
+[3:37.5] Rosalía and Florentina watched from a distance. They felt jealous because people were no longer paying attention to them. However, they also began to understand that they had treated Lila unfairly.
+[3:47.9] That night, they approached her.
+[3:49.5] “We are sorry,” Rosalía said. “We were wrong about you.”
+[3:54.2] “You were not late,” Florentina added quietly. “You were just different.”
+[3:59.2] Lila looked at them and smiled. She was happy that they had apologized, but she also understood something important: she did not need everyone to admire her to know that she had value.
+[4:09.6] “I know,” she replied. “I just needed my own time.”
 
 ## Resolution
-From that day on, the meadow had flowers that bloomed during the day and one special flower that opened at night. Lila no longer felt ashamed of being different. She understood that every flower had its own way of growing and its own time to bloom.
-Every evening, when the Moon appeared in the sky, Lila opened her petals and shone beside her friends, Chispa and the Moon.
+[4:13.3] From that day on, the meadow had flowers that bloomed during the day and one special flower that opened at night. Lila no longer felt ashamed of being different. She understood that every flower had its own way of growing and its own time to bloom.
+[4:29.3] Every evening, when the Moon appeared in the sky, Lila opened her petals and shone beside her friends, Chispa and the Moon.
 
-> And so, the meadow learned an important lesson: being different does not mean being less, because everyone has their own time to grow and flourish.`,
+[4:37.2] > And so, the meadow learned an important lesson: being different does not mean being less, because everyone has their own time to grow and flourish.`,
       reflexion: ["Being different does not mean being less, because everyone has their own time to grow and flourish."],
       enfoque: {
         gramatica: ["Past simple", "Adverbs of manner"],
