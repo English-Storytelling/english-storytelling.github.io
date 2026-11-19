@@ -35,8 +35,8 @@ window.SITE = {
     ]
   },
   citas: [
-    { texto: "Write an inspiring quote here.", autor: "Author" },
-    { texto: "Add a second quote, or delete this one.", autor: "Author" }
+    { texto: "Stories offer a central road for language development.", autor: "Andrew Wright (2019)" },
+    { texto: "A good story encourages us to turn the next page and read more.", autor: "Karen Saxby" }
   ],
   equipo: {
     titulo: "Meet the Teachers",
@@ -59,7 +59,7 @@ window.SITE = {
   },
   objetivos: {
     titulo: "Learning Objectives",
-    intro: "Through the stories and media on this site, students develop core A2 English skills.",
+    intro: "Through the stories and media on this site, students develop core B1 English skills.",
     areas: [
       { area: "Grammar", items: ["Use present simple and past simple", "Ask and answer questions", "Talk about daily routines"] },
       { area: "Reading", items: ["Understand the plot of a story", "Identify the main characters", "Predict what happens next"] },
